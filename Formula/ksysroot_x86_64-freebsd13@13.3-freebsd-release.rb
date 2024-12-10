@@ -8,9 +8,9 @@ class KsysrootX8664Freebsd13AT133FreebsdRelease < Formula
 
   bottle do
     root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ff0dd10f493e7dc07cb017c7b80e515bc25b84d26ccccb8b7327b8173ec00715"
-    sha256 cellar: :any_skip_relocation, ventura:       "cced81a379ed191b7c98116d4f539b0a202799a223715cdc1279aae290ba574e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0400a4f88e532d96a0efe2ed89f36d37bfb9511b57f4e2a95cface2b56bb3245"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "492796477fcdcab0866a590e3719e6dd4b0d1bce8d4996b6af8a3ea08732dc9b"
+    sha256 cellar: :any_skip_relocation, ventura:       "677eee2ee2ec4bc81bb3b720f2dbea38c0c46e56f7ebeb1d2f53c0c57c4c4dca"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "ecc113814c90d83e285482f477b08c8b8eb7a42fe8fc1bdeec0b8ce9133e799e"
   end
 
   keg_only :versioned_formula
