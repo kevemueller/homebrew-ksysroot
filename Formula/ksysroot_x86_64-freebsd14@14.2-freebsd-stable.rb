@@ -1,17 +1,10 @@
-class KsysrootX8664Freebsd14AT141FreebsdRelease < Formula
-  desc "Sysroot for x86_64-freebsd14@freebsd14.1-RELEASE"
+class KsysrootX8664Freebsd14AT142FreebsdStable < Formula
+  desc "Sysroot for x86_64-freebsd14@freebsd14.2-STABLE"
   homepage "https://github.com/kevemueller/ksysroot"
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.2.tar.gz"
   sha256 "c3b16ca49dc38e2d72d67cf71b6d153048428aed250b263f372c91289834789a"
   license "BSD-2-Clause"
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "ff0dd10f493e7dc07cb017c7b80e515bc25b84d26ccccb8b7327b8173ec00715"
-    sha256 cellar: :any_skip_relocation, ventura:       "cced81a379ed191b7c98116d4f539b0a202799a223715cdc1279aae290ba574e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0400a4f88e532d96a0efe2ed89f36d37bfb9511b57f4e2a95cface2b56bb3245"
-  end
 
   keg_only :versioned_formula
 
@@ -21,8 +14,8 @@ class KsysrootX8664Freebsd14AT141FreebsdRelease < Formula
   depends_on "pkgconf"
 
   resource "base.txz" do
-    url "https://download.freebsd.org/releases/amd64/amd64/14.1-RELEASE/base.txz"
-    sha256 "bb451694e8435e646b5ff7ddc5e94d5c6c9649f125837a34b2a2dd419732f347"
+    url "https://download.freebsd.org/snapshots/amd64/14.2-STABLE/base.txz"
+    sha256 "3461faf670f0e8c06fe72eb5b3725247f270e819d5ae190b54f21e65ed8f2fbe"
   end
 
   def install
@@ -30,7 +23,7 @@ class KsysrootX8664Freebsd14AT141FreebsdRelease < Formula
     ENV["BREW_PREFIX_LLD"]=Formula["lld"].prefix
     ENV["BREW_PREFIX_PKGCONF"]=Formula["pkgconf"].prefix
     ENV["BASE_TXZ"]=resource("base.txz").cached_download
-    system "./ksysroot.sh", "install", prefix, "x86_64-freebsd14@freebsd14.1-RELEASE"
+    system "./ksysroot.sh", "install", prefix, "x86_64-freebsd14@freebsd14.2-STABLE"
   end
 
   test do
