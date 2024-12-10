@@ -1,5 +1,5 @@
-class KsysrootX8664Freebsd14AT141FreebsdRelease < Formula
-  desc "Sysroot for x86_64-freebsd14@freebsd14.1-RELEASE"
+class KsysrootX8664Freebsd13AT133FreebsdRelease < Formula
+  desc "Sysroot for x86_64-freebsd13@freebsd13.3-RELEASE"
   homepage "https://github.com/kevemueller/ksysroot"
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.2.tar.gz"
   sha256 "c3b16ca49dc38e2d72d67cf71b6d153048428aed250b263f372c91289834789a"
@@ -21,8 +21,8 @@ class KsysrootX8664Freebsd14AT141FreebsdRelease < Formula
   depends_on "pkgconf"
 
   resource "base.txz" do
-    url "https://download.freebsd.org/releases/amd64/amd64/14.1-RELEASE/base.txz"
-    sha256 "bb451694e8435e646b5ff7ddc5e94d5c6c9649f125837a34b2a2dd419732f347"
+    url "https://download.freebsd.org/releases/amd64/amd64/13.3-RELEASE/base.txz"
+    sha256 "d10531d663cee5efeb7d696ca84ce90adacd1fae14dd249628fb74da0c7c2820"
   end
 
   def install
@@ -30,7 +30,7 @@ class KsysrootX8664Freebsd14AT141FreebsdRelease < Formula
     ENV["BREW_PREFIX_LLD"]=Formula["lld"].prefix
     ENV["BREW_PREFIX_PKGCONF"]=Formula["pkgconf"].prefix
     ENV["BASE_TXZ"]=resource("base.txz").cached_download
-    system "./ksysroot.sh", "install", prefix, "x86_64-freebsd14@freebsd14.1-RELEASE"
+    system "./ksysroot.sh", "install", prefix, "x86_64-freebsd13@freebsd13.3-RELEASE"
   end
 
   test do
