@@ -11,6 +11,13 @@ class Debootstrap < Formula
     patch :DATA
   end
 
+  bottle do
+    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "d3a5158e6c6a00520f2efee139754d8bb4940b0996e031dbc0e2aa88c7f3d583"
+    sha256 cellar: :any_skip_relocation, ventura:       "c3e0126af6d5652a5784b28013fb86d3249d76345b3b3ccde775cf9b0e429770"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "cb7ff328d5775204e8c54e11b08f3e9bd2b23e72374e2af622f5e8a742f7c4d9"
+  end
+
   depends_on "wget"
   on_sonoma :or_older do
     # for sha256sum
