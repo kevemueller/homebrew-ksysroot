@@ -62,6 +62,14 @@ class Debootstrap < Formula
         if ! doing_variant fakechroot; then
     PEND
   end
+
+  bottle do
+    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "690c9b602f028b4eaf8d306f0e087759ca94207ee4f3d1d9b5810fcb809ef7c5"
+    sha256 cellar: :any_skip_relocation, ventura:       "2d5798db52f48373800f7c60f8534e006b5f1b9ec1389954bd76b5918a7854ce"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "914b0f815f946e85a02971979c11a2ea01f14e58f3ad24b004203b89ea07a7de"
+  end
   depends_on "wget"
 
   on_sonoma :or_older do
