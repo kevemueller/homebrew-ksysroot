@@ -6,6 +6,12 @@ class KsysrootAarch64LinuxGnuAT12Debian < Formula
   license "BSD-2-Clause"
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
 
+  bottle do
+    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "32c08a99f5b68a912fedd2ae7e89791457d248a0915189e8daf9d1f047879c8f"
+    sha256 cellar: :any_skip_relocation, ventura:       "b8ea9d42d4028bead6f23aa3eb65bbb5e7048b12a0be235ce0eddba0aaae676e"
+  end
+
   keg_only :versioned_formula
 
   depends_on "meson" => :test
