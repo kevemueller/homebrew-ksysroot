@@ -2,7 +2,7 @@ class Debootstrap < Formula
   desc "Bootstrap a basic Debian system"
   homepage "https://wiki.debian.org/Debootstrap"
   license "MIT"
-  revision 1
+  revision 2
   head "https://salsa.debian.org/installer-team/debootstrap.git", branch: "master"
 
   stable do
@@ -170,7 +170,7 @@ index 0000000..73be955
 +#!/usr/bin/env bash
 +tee >(/usr/bin/tar -cf - --format=mtree @- >> LOG.mtree) | /usr/bin/tar "$@"
 diff --git a/functions b/functions
-index e023e9d..6f6c099 100644
+index e023e9d..c7e1199 100644
 --- a/functions
 +++ b/functions
 @@ -1843,7 +1843,7 @@ check_sane_mount () {
@@ -178,7 +178,7 @@ index e023e9d..6f6c099 100644
  		;;
  	    *)
 -		if ! doing_variant fakechroot; then
-+		if ! ( doing_variant fakechroot -o "$UNPRIVILEGED" = "1" ); then
++		if ! ( doing_variant fakechroot || test "$UNPRIVILEGED" = "1" ); then
  		case "$CONTAINER" in
  		  lxc|lxc-libvirt|mmdebstrap-unshare)
  		    ;;
