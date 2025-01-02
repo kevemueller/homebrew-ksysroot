@@ -2,6 +2,7 @@ class Debootstrap < Formula
   desc "Bootstrap a basic Debian system"
   homepage "https://wiki.debian.org/Debootstrap"
   license "MIT"
+  revision 1
   head "https://salsa.debian.org/installer-team/debootstrap.git", branch: "master"
 
   stable do
