@@ -66,10 +66,9 @@ class Debootstrap < Formula
 
   bottle do
     root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    rebuild 2
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "424991aba454434b3f90740dcae9e8d6218ec715c4beed8297ca1b185163d0a9"
-    sha256 cellar: :any_skip_relocation, ventura:       "584a5fecacba81dc1b5152d146e258b14a41fd6724e45031e30a99c5f1bf2b9d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b48a933c17e88269f857ddeaf292c527cc72800c9b9ba3497bddffeac4220d35"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "4d0049d916545feb8120796093c44b03c587706b4e1e848429ea98c0722cd97f"
+    sha256 cellar: :any_skip_relocation, ventura:       "3d9ca7b63ef8406b05643fe4984648f630c2313d5d24375193882cd7f05743f3"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "1b415c5f660b59d0ad0c5604db95a14d6abb9c05a23a78ea7c6c8b307f12292c"
   end
   depends_on "wget"
 
