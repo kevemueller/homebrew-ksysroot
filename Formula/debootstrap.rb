@@ -117,7 +117,7 @@ class Debootstrap < Formula
 end
 __END__
 diff --git a/debootstrap b/debootstrap
-index 431d6b3..c166bf9 100755
+index 431d6b3..f2d48fa 100755
 --- a/debootstrap
 +++ b/debootstrap
 @@ -137,6 +137,8 @@ usage()
@@ -129,11 +129,12 @@ index 431d6b3..c166bf9 100755
  EOF
  }
  
-@@ -442,6 +444,10 @@ if [ $# != 0 ] ; then
+@@ -442,6 +444,11 @@ if [ $# != 0 ] ; then
  			error 1 NEEDARG "option requires an argument %s" "$1"
  		fi
  		;;
 +		--unprivileged)
++			UNPRIVILEGED=1
 +			export PATH=$DEBOOTSTRAP_DIR/../../libexec:$PATH
 +			shift
 +			;;
@@ -168,3 +169,17 @@ index 0000000..73be955
 @@ -0,0 +1,2 @@
 +#!/usr/bin/env bash
 +tee >(/usr/bin/tar -cf - --format=mtree @- >> LOG.mtree) | /usr/bin/tar "$@"
+diff --git a/functions b/functions
+index e023e9d..6f6c099 100644
+--- a/functions
++++ b/functions
+@@ -1843,7 +1843,7 @@ check_sane_mount () {
+ 	    *freebsd*|hurd*|darwin)
+ 		;;
+ 	    *)
+-		if ! doing_variant fakechroot; then
++		if ! ( doing_variant fakechroot -o "$UNPRIVILEGED" = "1" ); then
+ 		case "$CONTAINER" in
+ 		  lxc|lxc-libvirt|mmdebstrap-unshare)
+ 		    ;;
+
