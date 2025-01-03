@@ -1,29 +1,20 @@
-class KsysrootAarch64LinuxGnuAT12Debian < Formula
+class KsysrootAarch64LinuxGnu < Formula
   desc "Sysroot for aarch64-linux-gnu@debian12"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.5.1.tar.gz"
-  sha256 "52e1f6c032e34d3642ba7f3e66ea400f9ba31125dc732b6556f5f08f862b5502"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.2.tar.gz"
+  sha256 "df05e2cd464e92d2b4582878e685ddf30a97e457b015c2a573d3cfa2f005f5a5"
   license "BSD-2-Clause"
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "32c08a99f5b68a912fedd2ae7e89791457d248a0915189e8daf9d1f047879c8f"
-    sha256 cellar: :any_skip_relocation, ventura:       "b8ea9d42d4028bead6f23aa3eb65bbb5e7048b12a0be235ce0eddba0aaae676e"
-  end
-
-  keg_only :versioned_formula
 
   depends_on "meson" => :test
   depends_on "lld"
   depends_on "llvm"
   depends_on "pkgconf"
-
   uses_from_macos "libarchive"
 
-  on_linux do
-    disable! date:    "2024-01-01",
-             because: "fails audit >>Binaries built for a non-native architecture were installed<<"
+  on_sonoma :or_older do
+    # for sha256sum
+    depends_on "coreutils"
   end
 
   resource "gcc-12-base" do
@@ -190,9 +181,9 @@ class KsysrootAarch64LinuxGnuAT12Debian < Formula
   def install
     cachedir=ENV.fetch("HOMEBREW_CACHE")
     ENV["CACHE_DIR"]=cachedir
-    ENV["BREW_PREFIX_LLVM"]=Formula["llvm"].prefix
-    ENV["BREW_PREFIX_LLD"]=Formula["lld"].prefix
-    ENV["BREW_PREFIX_PKGCONF"]=Formula["pkgconf"].prefix
+    ENV["LLVM_DIR"]=Formula["llvm"].bin
+    ENV["LLD_DIR"]=Formula["lld"].bin
+    ENV["PKG_CONFIG"]="#{Formula["pkgconf"].bin}/pkg-config"
     bom = <<~EOS
       # KSYSROOT_TRIPLE=aarch64-linux-gnu KSYSROOT_FULL_TRIPLE=aarch64-linux6.1-gnu
       # KSYSROOT_OSFLAVOUR=debian KSYSROOT_OSRELEASE=12
@@ -202,18 +193,17 @@ class KsysrootAarch64LinuxGnuAT12Debian < Formula
       # DEBIAN_ARCH=arm64 LINUX_VERSION=6.1
     EOS
     bom << resources.map { |r|
-      "#{r.name} #{r.version} #{r.url} #{r.cached_download.to_s.delete_prefix(cachedir)}"
+      "#{r.name} #{r.version} #{r.url} #{r.cached_download.to_s.delete_prefix(cachedir)} #{r.checksum}"
     }.join("\n")
     bom << "\n"
     ohai "bom=#{bom}"
     File.write("bom.in", bom)
     system "./ksysroot.sh", "frombom", prefix, "bom.in"
   end
-
   test do
     resource "testcases" do
-      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.5.1.tar.gz"
-      sha256 "52e1f6c032e34d3642ba7f3e66ea400f9ba31125dc732b6556f5f08f862b5502"
+      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.2.tar.gz"
+      sha256 "df05e2cd464e92d2b4582878e685ddf30a97e457b015c2a573d3cfa2f005f5a5"
     end
     resource("testcases").stage do
       ENV.delete("CC")
@@ -225,23 +215,24 @@ class KsysrootAarch64LinuxGnuAT12Debian < Formula
       ENV.delete("CPPFLAGS")
       ENV.delete("CXXFLAGS")
       ENV.delete("LDFLAGS")
+      ENV.delete("LD_RUN_PATH")
+      ENV.delete("LIBRARY_PATH")
       ENV.delete("OBJCFLAGS")
       ENV.delete("OBJCXXFLAGS")
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # cross build a C library + program
+      # build a C library + program
       system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
              "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
       assert_predicate testpath/"build-c/main", :exist?
 
-      # cross build a C++ library + program
+      # build a C++ library + program
       system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
              "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
       assert_predicate testpath/"build-cxx/main", :exist?
-
       # check pkg-config personality is proper
       assert_equal "-lcrypt", shell_output("#{bin}/aarch64-linux-gnu-pkg-config --libs libcrypt").strip
       assert_equal "", shell_output("#{bin}/aarch64-linux-gnu-pkg-config --cflags libcrypt").strip
