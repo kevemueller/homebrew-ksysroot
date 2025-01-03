@@ -6,7 +6,7 @@
   "ksysroot_aarch64-freebsd14.1@14.1-freebsd-release": "cross/**/*",
   "ksysroot_aarch64-freebsd14.2@14.2-freebsd-stable": "cross/**/*",
   "ksysroot_aarch64-freebsd15.0@15.0-freebsd-current": "cross/**/*",
-  "ksysroot_aarch64-linux-gnu@12-debian": "cross/**/*",
+  "ksysroot_aarch64-linux-gnu": "cross/**/*",
   "ksysroot_i686-freebsd": "cross/**/*",
   "ksysroot_i686-freebsd13.3@13.3-freebsd-release": "cross/**/*",
   "ksysroot_i686-freebsd13.4@13.4-freebsd-release": "cross/**/*",
@@ -55,5 +55,6 @@
   "ksysroot_x86_64-freebsd13.4@13.4-freebsd-stable": "cross/**/*",
   "ksysroot_x86_64-freebsd14.1@14.1-freebsd-release": "cross/**/*",
   "ksysroot_x86_64-freebsd14.2@14.2-freebsd-stable": "cross/**/*",
-  "ksysroot_x86_64-freebsd15.0@15.0-freebsd-current": "cross/**/*"
+  "ksysroot_x86_64-freebsd15.0@15.0-freebsd-current": "cross/**/*",
+  "ksysroot_x86_64-linux-gnu": "cross/**/*"
 }
