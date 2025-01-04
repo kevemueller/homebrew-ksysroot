@@ -40,6 +40,7 @@ jobs:
           name: bottles_${{ matrix.os }}
           path: '*.bottle.*'
   labeler:
+      needs: test-bot
       permissions:
         contents: read
         pull-requests: write
