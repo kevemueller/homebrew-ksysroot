@@ -6,6 +6,13 @@ class KsysrootX8664LinuxGnu < Formula
   license "BSD-2-Clause"
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
 
+  bottle do
+    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8ade3268459b2e4478650bd5724107af051d141b6ac9f49d60ad2e15112818c3"
+    sha256 cellar: :any_skip_relocation, ventura:       "ce2802e80f3a37550c03d4ebab3fd682401f5ad16841b1273ff2419ea0d38206"
+  end
+
   depends_on "meson" => :test
   depends_on "lld"
   depends_on "llvm"
