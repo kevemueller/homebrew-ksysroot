@@ -1,22 +1,20 @@
 class KsysrootNative < Formula
   desc "Sysroot for native@macos15.2"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.1.tar.gz"
-  sha256 "65da7faaa17289fb4376f611df6f06f91abceaa1798562873094a4c426aacb2f"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.2.tar.gz"
+  sha256 "df05e2cd464e92d2b4582878e685ddf30a97e457b015c2a573d3cfa2f005f5a5"
   license "BSD-2-Clause"
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "30a061dcf7383e7d488f47da6e24df3638c138cb89d38f5296ba583be506f7b1"
-    sha256 cellar: :any_skip_relocation, ventura:       "2c8c90e699427dadb4dff43ebc27a0fe06d4f44fe5a4387c39c295f839e70e1f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d97aa5f2fdc692652c04f6ab703f6aed8c8041981d372c0f424c8431e5c8beb8"
-  end
 
   depends_on "meson" => :test
   depends_on "lld"
   depends_on "llvm"
   depends_on "pkgconf"
+
+  on_sonoma :or_older do
+    # for sha256sum
+    depends_on "coreutils"
+  end
 
   def install
     cachedir=ENV.fetch("HOMEBREW_CACHE")
@@ -28,8 +26,8 @@ class KsysrootNative < Formula
   end
   test do
     resource "testcases" do
-      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.1.tar.gz"
-      sha256 "65da7faaa17289fb4376f611df6f06f91abceaa1798562873094a4c426aacb2f"
+      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.2.tar.gz"
+      sha256 "df05e2cd464e92d2b4582878e685ddf30a97e457b015c2a573d3cfa2f005f5a5"
     end
     resource("testcases").stage do
       ENV.delete("CC")
@@ -63,3 +61,4 @@ class KsysrootNative < Formula
     end
   end
 end
+balibu
