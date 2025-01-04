@@ -1,18 +1,10 @@
 class KsysrootMips64elLinuxGnuabi64 < Formula
   desc "Sysroot for mips64el-linux-gnuabi64@debian12"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.2.tar.gz"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.3.tar.gz"
   sha256 "df05e2cd464e92d2b4582878e685ddf30a97e457b015c2a573d3cfa2f005f5a5"
   license "GPL-2.0-or-later"
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "c9844734201a0a9cce3facbee64f2442544cc4ff95dfa9a45fbd80a0535c668d"
-    sha256 cellar: :any_skip_relocation, ventura:       "2f0dc8a44c26b83a468e7e947cea9cf4c101915e05a2536bcce26ed79d56443e"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "0d28210da4bf9d0a7768857a0455ea8aa50f401a09224c5d2714d8d6a80bb929"
-  end
 
   depends_on "meson" => :test
   depends_on "lld"
@@ -207,7 +199,7 @@ class KsysrootMips64elLinuxGnuabi64 < Formula
   end
   test do
     resource "testcases" do
-      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.2.tar.gz"
+      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.3.tar.gz"
       sha256 "df05e2cd464e92d2b4582878e685ddf30a97e457b015c2a573d3cfa2f005f5a5"
     end
     resource("testcases").stage do
