@@ -4,6 +4,7 @@ class KsysrootPowerpc64leLinuxGnu < Formula
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.2.tar.gz"
   sha256 "df05e2cd464e92d2b4582878e685ddf30a97e457b015c2a573d3cfa2f005f5a5"
   license "GPL-2.0-or-later"
+  revision 1
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
 
   depends_on "meson" => :test
@@ -232,5 +233,43 @@ class KsysrootPowerpc64leLinuxGnu < Formula
     ohai "bom=#{bom}"
     File.write("bom.in", bom)
     system "./ksysroot.sh", "frombom", prefix, "bom.in"
+  end
+  test do
+    resource "testcases" do
+      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.2.tar.gz"
+      sha256 "df05e2cd464e92d2b4582878e685ddf30a97e457b015c2a573d3cfa2f005f5a5"
+    end
+    resource("testcases").stage do
+      ENV.delete("CC")
+      ENV.delete("CXX")
+      ENV.delete("CXX")
+      ENV.delete("OBJC")
+      ENV.delete("OBJCXX")
+      ENV.delete("CFLAGS")
+      ENV.delete("CPPFLAGS")
+      ENV.delete("CXXFLAGS")
+      ENV.delete("LDFLAGS")
+      ENV.delete("LD_RUN_PATH")
+      ENV.delete("LIBRARY_PATH")
+      ENV.delete("OBJCFLAGS")
+      ENV.delete("OBJCXXFLAGS")
+      ENV.delete("CPATH")
+      ENV.delete("PKG_CONFIG_LIBDIR")
+      system "set"
+      # build a C library + program
+      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
+             "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
+      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
+      assert_predicate testpath/"build-c/main", :exist?
+
+      # build a C++ library + program
+      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
+             "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
+      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
+      assert_predicate testpath/"build-cxx/main", :exist?
+      # check pkg-config personality is proper
+      assert_equal "-lcrypt", shell_output("#{bin}/powerpc64le-linux-gnu-pkg-config --libs libcrypt").strip
+      assert_equal "", shell_output("#{bin}/powerpc64le-linux-gnu-pkg-config --cflags libcrypt").strip
+    end
   end
 end
