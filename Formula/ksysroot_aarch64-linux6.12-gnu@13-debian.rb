@@ -1,10 +1,9 @@
 class KsysrootAarch64Linux612GnuAT13Debian < Formula
   desc "Sysroot for aarch64-linux-gnu@debian13"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.2.tar.gz"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.3.tar.gz"
   sha256 "df05e2cd464e92d2b4582878e685ddf30a97e457b015c2a573d3cfa2f005f5a5"
   license "GPL-2.0-or-later"
-  revision 1
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
 
   keg_only :versioned_formula
@@ -166,7 +165,7 @@ class KsysrootAarch64Linux612GnuAT13Debian < Formula
   end
   test do
     resource "testcases" do
-      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.2.tar.gz"
+      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.3.tar.gz"
       sha256 "df05e2cd464e92d2b4582878e685ddf30a97e457b015c2a573d3cfa2f005f5a5"
     end
     resource("testcases").stage do
