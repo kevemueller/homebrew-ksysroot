@@ -1,2 +1,2 @@
-pr-pullT:
+pr-pull:
  - head-branch: ['^prp']
