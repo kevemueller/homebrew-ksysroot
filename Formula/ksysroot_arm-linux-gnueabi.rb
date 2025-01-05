@@ -6,6 +6,13 @@ class KsysrootArmLinuxGnueabi < Formula
   license "GPL-2.0-or-later"
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
 
+  bottle do
+    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "17d235de3d90a84a290c2b1305511712ccd6f4cc3d75a690dd098af47fda59d0"
+    sha256 cellar: :any_skip_relocation, ventura:       "3eb3b85c64a6c74a99810bb88dbffd8d94aa9163ad8c5e31491111373294af40"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "a88ffdb9fa52a9b9598e209325e28150714a3232a4c6a223b7b2db24f415a2c8"
+  end
+
   depends_on "meson" => :test
   depends_on "lld"
   depends_on "llvm"
