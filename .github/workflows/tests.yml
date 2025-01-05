@@ -30,7 +30,10 @@ jobs:
 
       - run: brew test-bot --only-tap-syntax
 
-      - run: brew test-bot --only-formulae --test-default-formula --root-url='https://ghcr.io/v2/kevemueller/ksysroot'
+      - run: |
+          brew test-bot --only-formulae --root-url='https://ghcr.io/v2/kevemueller/ksysroot' | tee test-bot.log
+          grep "failed steps? ignored" test-bot.log && echo bad || echo worse
+          exit 1
         if: github.event_name == 'pull_request'
 
       - name: Upload bottles as artifact
