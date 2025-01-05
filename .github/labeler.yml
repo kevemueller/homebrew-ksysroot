@@ -1,2 +1,5 @@
 pr-pull:
- - head-branch: ['^prp']
+  - head-branch: ['^prp']
+
+pr-merge:
+  - head-branch: ['^prm']
