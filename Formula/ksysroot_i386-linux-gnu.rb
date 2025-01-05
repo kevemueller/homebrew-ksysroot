@@ -1,17 +1,10 @@
 class KsysrootI386LinuxGnu < Formula
   desc "Sysroot for i386-linux-gnu@debian12"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.3.tar.gz"
-  sha256 "144a1024ab6b971fd6f3d63f03906b7c25bd22e52d4780365e6b70888bfd0918"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
+  sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
   license "GPL-2.0-or-later"
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "0680acc54dc5ed04625e39c3f63b35ac9ae3ac8ee18411252b956a9d2c2b230d"
-    sha256 cellar: :any_skip_relocation, ventura:       "80f065a79152c9c6242cdaf87a3e3830ff06ba0e1ae0305c7517a23306cd6040"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d6773452027ecc1c3dece6ced473533881bcc46d9ebe6a5b8c0a91de8480017b"
-  end
 
   depends_on "meson" => :test
   depends_on "lld"
@@ -230,8 +223,8 @@ class KsysrootI386LinuxGnu < Formula
   end
   test do
     resource "testcases" do
-      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.3.tar.gz"
-      sha256 "144a1024ab6b971fd6f3d63f03906b7c25bd22e52d4780365e6b70888bfd0918"
+      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
+      sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
     end
     resource("testcases").stage do
       ENV.delete("CC")
