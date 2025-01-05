@@ -1,0 +1,10 @@
+external-sources=true
+disable=SC3043
+disable=SC2312
+
+# FIXME
+disable=SC2129
+
+# we are NOT using bash
+disable=SC2292
+disable=SC2311
