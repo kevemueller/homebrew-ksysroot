@@ -4,14 +4,8 @@ class KsysrootNative < Formula
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
   sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
   license ""
+  revision 1
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "4b00b88746ed8fda8cf9004ab8d85b1ce47ef6897a3de971791e53eca0b9ea56"
-    sha256 cellar: :any_skip_relocation, ventura:       "30d2ac9b1ab52ac322de40f14f5faab69492e2098aa68021bf4cbb98f5203c95"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e52eb853f9ed5d34dfc84feab203bffe2b112983fffdda8621c8d421a5a9930a"
-  end
 
   depends_on "meson" => :test
   depends_on "lld"
@@ -33,8 +27,8 @@ class KsysrootNative < Formula
   end
   test do
     resource "testcases" do
-      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
-      sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
+      url KsysrootNative.stable.url
+      sha256 KsysrootNative.stable.checksum.hexdigest
     end
     resource("testcases").stage do
       ENV.delete("CC")
@@ -53,17 +47,18 @@ class KsysrootNative < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # build a C library + program
+      # build a C library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
              testpath/"build-c", "test-c"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
       assert_predicate testpath/"build-c/main", :exist?
 
-      # build a C++ library + program
+      # build a C++ library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
              testpath/"build-cxx", "test-cxx"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
       assert_predicate testpath/"build-cxx/main", :exist?
+      # check that pkg-config runs
       system "#{bin}/native-pkg-config", "--list-all"
     end
   end
