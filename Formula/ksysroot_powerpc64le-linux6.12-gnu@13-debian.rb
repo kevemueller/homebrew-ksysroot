@@ -1,10 +1,9 @@
 class KsysrootPowerpc64leLinux612GnuAT13Debian < Formula
   desc "Sysroot for powerpc64le-linux-gnu@debian13"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
-  sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.7.tar.gz"
+  sha256 "4d5df4fcc95dd3f0919586ed69a85257d4749d09f6e30a5dc4889fbce73dbcfe"
   license "GPL-2.0-or-later"
-  revision 1
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
 
   keg_only :versioned_formula
