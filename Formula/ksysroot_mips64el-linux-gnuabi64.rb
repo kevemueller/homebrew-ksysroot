@@ -4,14 +4,8 @@ class KsysrootMips64elLinuxGnuabi64 < Formula
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
   sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
   license "GPL-2.0-or-later"
+  revision 1
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "9cd73b58d3c92f388f97942bbc3fa6c6e215dd11f16f7fa8066ff665ca9eadf6"
-    sha256 cellar: :any_skip_relocation, ventura:       "d9f2e2368a205c1b29610bf5b0b9b4c1d46bcae3753ff0e44181b4b8d7328e1b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "06bd13dd3395251ce4bee9715c5eee84ae8fccbc966b8eab300e6c6bc99a7053"
-  end
 
   depends_on "meson" => :test
   depends_on "lld"
@@ -19,7 +13,6 @@ class KsysrootMips64elLinuxGnuabi64 < Formula
   depends_on "pkgconf"
 
   uses_from_macos "libarchive"
-
   on_sonoma :or_older do
     # for sha256sum
     depends_on "coreutils"
@@ -191,6 +184,7 @@ class KsysrootMips64elLinuxGnuabi64 < Formula
       # KSYSROOT_TRIPLE=mips64el-linux-gnuabi64 KSYSROOT_FULL_TRIPLE=mips64el-linux6.1-gnuabi64
       # KSYSROOT_OSFLAVOUR=debian KSYSROOT_OSRELEASE=12
       # KSYSROOT_LINKER=ld.lld
+      # KSYSROOT_LICENSE=GPL-2.0-or-later
       # MESON_SYSTEM=linux MESON_CPUFAMILY=mips64 MESON_CPU=mips64 MESON_ENDIAN=little
       # DEBIAN_VERSION=12 DEBIAN_NAME=bookworm DEBIAN_GCC=12
       # DEBIAN_ARCH=mips64el LINUX_VERSION=6.1
@@ -206,8 +200,8 @@ class KsysrootMips64elLinuxGnuabi64 < Formula
   end
   test do
     resource "testcases" do
-      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
-      sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
+      url KsysrootMips64elLinuxGnuabi64.stable.url
+      sha256 KsysrootMips64elLinuxGnuabi64.stable.checksum.hexdigest
     end
     resource("testcases").stage do
       ENV.delete("CC")
@@ -226,18 +220,18 @@ class KsysrootMips64elLinuxGnuabi64 < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # build a C library + program
+      # build a C library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
              "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
       assert_predicate testpath/"build-c/main", :exist?
 
-      # build a C++ library + program
+      # build a C++ library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
              "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
       assert_predicate testpath/"build-cxx/main", :exist?
-      # check pkg-config personality is proper
+      # check pkg-config personality is properly set-up
       assert_equal "-lcrypt", shell_output("#{bin}/mips64el-linux-gnuabi64-pkg-config --libs libcrypt").strip
       assert_equal "", shell_output("#{bin}/mips64el-linux-gnuabi64-pkg-config --cflags libcrypt").strip
     end
