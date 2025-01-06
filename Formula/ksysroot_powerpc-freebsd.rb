@@ -6,6 +6,13 @@ class KsysrootPowerpcFreebsd < Formula
   license "BSD-2-Clause"
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
 
+  bottle do
+    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "f70edebb4520402581ce688ef40cf3868fdc3dcec95f7865d918b2ad68efecba"
+    sha256 cellar: :any_skip_relocation, ventura:       "f32d98ee12d4b9a35dabfd167f0b9731c0f3a8bbc45003c858d1a5997d9f82d4"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "79765843e878c36cfd394366feea4d10bcba7b4532615df742cd33a398fc82a7"
+  end
+
   depends_on "meson" => :test
   depends_on "lld"
   depends_on "llvm"
