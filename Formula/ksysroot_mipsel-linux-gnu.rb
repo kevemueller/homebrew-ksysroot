@@ -4,14 +4,8 @@ class KsysrootMipselLinuxGnu < Formula
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
   sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
   license "GPL-2.0-or-later"
+  revision 1
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "59c72d43a60f2946a8d866b2ea2a17986b2b5ee63493b416b28dfd22b9422eb5"
-    sha256 cellar: :any_skip_relocation, ventura:       "b868b50c2d3062a71ed428fed9e60596192f57e1dc2bdce6f6c0704c6981eed7"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4d516e72c27d310461099f84de1c224bc910bb3e06cbc9de451a201f4d7ddf81"
-  end
 
   depends_on "meson" => :test
   depends_on "lld"
@@ -19,7 +13,6 @@ class KsysrootMipselLinuxGnu < Formula
   depends_on "pkgconf"
 
   uses_from_macos "libarchive"
-
   on_sonoma :or_older do
     # for sha256sum
     depends_on "coreutils"
@@ -191,6 +184,7 @@ class KsysrootMipselLinuxGnu < Formula
       # KSYSROOT_TRIPLE=mipsel-linux-gnu KSYSROOT_FULL_TRIPLE=mipsel-linux6.1-gnu
       # KSYSROOT_OSFLAVOUR=debian KSYSROOT_OSRELEASE=12
       # KSYSROOT_LINKER=ld.lld
+      # KSYSROOT_LICENSE=GPL-2.0-or-later
       # MESON_SYSTEM=linux MESON_CPUFAMILY=mips MESON_CPU=mips MESON_ENDIAN=little
       # DEBIAN_VERSION=12 DEBIAN_NAME=bookworm DEBIAN_GCC=12
       # DEBIAN_ARCH=mipsel LINUX_VERSION=6.1
@@ -206,8 +200,8 @@ class KsysrootMipselLinuxGnu < Formula
   end
   test do
     resource "testcases" do
-      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
-      sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
+      url KsysrootMipselLinuxGnu.stable.url
+      sha256 KsysrootMipselLinuxGnu.stable.checksum.hexdigest
     end
     resource("testcases").stage do
       ENV.delete("CC")
@@ -226,18 +220,18 @@ class KsysrootMipselLinuxGnu < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # build a C library + program
+      # build a C library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
              "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
       assert_predicate testpath/"build-c/main", :exist?
 
-      # build a C++ library + program
+      # build a C++ library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
              "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
       assert_predicate testpath/"build-cxx/main", :exist?
-      # check pkg-config personality is proper
+      # check pkg-config personality is properly set-up
       assert_equal "-lcrypt", shell_output("#{bin}/mipsel-linux-gnu-pkg-config --libs libcrypt").strip
       assert_equal "", shell_output("#{bin}/mipsel-linux-gnu-pkg-config --cflags libcrypt").strip
     end
