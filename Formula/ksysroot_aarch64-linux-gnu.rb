@@ -7,6 +7,13 @@ class KsysrootAarch64LinuxGnu < Formula
   revision 1
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
 
+  bottle do
+    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "3e430612f9ff71964917b73cfdd91a34bb4e808b7d6bb0af3b24ed70b97e7663"
+    sha256 cellar: :any_skip_relocation, ventura:       "2824dd5930b9ced26f0a339ec78e89bb6d6f4b14c17b285e6fdd2cdce74cd90b"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "911af36ee81c1fbb28268691501c9bc9f8204965eba49c27a83f369fb824ca4b"
+  end
+
   depends_on "meson" => :test
   depends_on "lld"
   depends_on "llvm"
