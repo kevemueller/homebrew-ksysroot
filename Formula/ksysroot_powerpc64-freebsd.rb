@@ -1,17 +1,10 @@
 class KsysrootPowerpc64Freebsd < Formula
   desc "Sysroot for powerpc64-freebsd14.2@freebsd14.2-RELEASE"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.1.tar.gz"
-  sha256 "65da7faaa17289fb4376f611df6f06f91abceaa1798562873094a4c426aacb2f"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
+  sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
   license "BSD-2-Clause"
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "0339517275ffd6fd28bb061c0a033b664e3885feed0d05bd60a9f54555be8ee5"
-    sha256 cellar: :any_skip_relocation, ventura:       "bd385de4d8423b6aafb4091323df115f0909884b790c40a02f4a2f36313461c4"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3b1cb45dc98fa28d828e7260aec99c12b190876e9a593430e5dd96db79373a82"
-  end
 
   depends_on "meson" => :test
   depends_on "lld"
@@ -19,10 +12,14 @@ class KsysrootPowerpc64Freebsd < Formula
   depends_on "pkgconf"
 
   uses_from_macos "libarchive"
+  on_sonoma :or_older do
+    # for sha256sum
+    depends_on "coreutils"
+  end
 
   resource "base.txz" do
     url "https://download.freebsd.org/releases/powerpc/powerpc64/14.2-RELEASE/base.txz"
-    version "14.2-RELEASE"
+    version "14.2-RELEASE-ksr"
     sha256 "d7f4fa793bb8add3b4859379e052020644e7ffb85764db966ad799d8681e3ab2"
   end
 
@@ -36,22 +33,23 @@ class KsysrootPowerpc64Freebsd < Formula
       # KSYSROOT_TRIPLE=powerpc64-freebsd14.2 KSYSROOT_FULL_TRIPLE=powerpc64-freebsd14.2
       # KSYSROOT_OSFLAVOUR=freebsd KSYSROOT_OSRELEASE=14.2-RELEASE
       # KSYSROOT_LINKER=ld.lld
+      # KSYSROOT_LICENSE=BSD-2-Clause
       # MESON_SYSTEM=freebsd MESON_CPUFAMILY=ppc64 MESON_CPU=ppc64 MESON_ENDIAN=little
       # FREEBSD_VERSION=14.2-RELEASE FREEBSD_MACHINE=powerpc FREEBSD_MACHINE_ARCH=powerpc64
     EOS
     bom << resources.map { |r|
-      "#{r.name} #{r.version} #{r.url} #{r.cached_download.to_s.delete_prefix(cachedir)}"
+      "#{r.name} #{r.version.to_s.delete_suffix("-ksr")} #{r.url} " \
+        "#{r.cached_download.relative_path_from(cachedir)} #{r.checksum}"
     }.join("\n")
     bom << "\n"
     ohai "bom=#{bom}"
     File.write("bom.in", bom)
     system "./ksysroot.sh", "frombom", prefix, "bom.in"
   end
-
   test do
     resource "testcases" do
-      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.1.tar.gz"
-      sha256 "65da7faaa17289fb4376f611df6f06f91abceaa1798562873094a4c426aacb2f"
+      url KsysrootPowerpc64Freebsd.stable.url
+      sha256 KsysrootPowerpc64Freebsd.stable.checksum.hexdigest
     end
     resource("testcases").stage do
       ENV.delete("CC")
@@ -70,19 +68,18 @@ class KsysrootPowerpc64Freebsd < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # cross build a C library + program
+      # build a C library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
              "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
       assert_predicate testpath/"build-c/main", :exist?
 
-      # cross build a C++ library + program
+      # build a C++ library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
              "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
       assert_predicate testpath/"build-cxx/main", :exist?
-
-      # check pkg-config personality is proper
+      # check pkg-config personality is properly set-up
       assert_equal "-lcrypto", shell_output("#{bin}/powerpc64-freebsd14.2-pkg-config --libs libcrypto").strip
       assert_equal "", shell_output("#{bin}/powerpc64-freebsd14.2-pkg-config --cflags libcrypto").strip
     end
