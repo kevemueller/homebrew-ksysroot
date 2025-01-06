@@ -4,13 +4,8 @@ class KsysrootX8664LinuxGnu < Formula
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
   sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
   license "GPL-2.0-or-later"
+  revision 1
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "0e991fab3540fe6c60e887ca705eb8c0ce557347fb5df4694adff19e8629665f"
-    sha256 cellar: :any_skip_relocation, ventura:       "0b5f3d27fdae693190905e48fc63343ef7920f9fd8a0d80c8ae8ebcf79c8d47e"
-  end
 
   depends_on "meson" => :test
   depends_on "lld"
@@ -18,12 +13,10 @@ class KsysrootX8664LinuxGnu < Formula
   depends_on "pkgconf"
 
   uses_from_macos "libarchive"
-
   on_sonoma :or_older do
     # for sha256sum
     depends_on "coreutils"
   end
-
   on_linux do
     disable! date: "2024-01-01", because: "Unwanted system libraries"
   end
@@ -230,6 +223,7 @@ class KsysrootX8664LinuxGnu < Formula
       # KSYSROOT_TRIPLE=x86_64-linux-gnu KSYSROOT_FULL_TRIPLE=x86_64-linux6.1-gnu
       # KSYSROOT_OSFLAVOUR=debian KSYSROOT_OSRELEASE=12
       # KSYSROOT_LINKER=ld.lld
+      # KSYSROOT_LICENSE=GPL-2.0-or-later
       # MESON_SYSTEM=linux MESON_CPUFAMILY=x86_64 MESON_CPU=x86_64 MESON_ENDIAN=little
       # DEBIAN_VERSION=12 DEBIAN_NAME=bookworm DEBIAN_GCC=12
       # DEBIAN_ARCH=amd64 LINUX_VERSION=6.1
@@ -245,8 +239,8 @@ class KsysrootX8664LinuxGnu < Formula
   end
   test do
     resource "testcases" do
-      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
-      sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
+      url KsysrootX8664LinuxGnu.stable.url
+      sha256 KsysrootX8664LinuxGnu.stable.checksum.hexdigest
     end
     resource("testcases").stage do
       ENV.delete("CC")
@@ -265,18 +259,18 @@ class KsysrootX8664LinuxGnu < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # build a C library + program
+      # build a C library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
              "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
       assert_predicate testpath/"build-c/main", :exist?
 
-      # build a C++ library + program
+      # build a C++ library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
              "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
       assert_predicate testpath/"build-cxx/main", :exist?
-      # check pkg-config personality is proper
+      # check pkg-config personality is properly set-up
       assert_equal "-lcrypt", shell_output("#{bin}/x86_64-linux-gnu-pkg-config --libs libcrypt").strip
       assert_equal "", shell_output("#{bin}/x86_64-linux-gnu-pkg-config --cflags libcrypt").strip
     end
