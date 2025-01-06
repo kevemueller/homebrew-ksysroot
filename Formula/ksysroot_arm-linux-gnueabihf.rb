@@ -4,14 +4,8 @@ class KsysrootArmLinuxGnueabihf < Formula
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
   sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
   license "GPL-2.0-or-later"
+  revision 1
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "df920c5881a7c019392c0a32b6e31b00be1ba14246d4b86a8b299ad3992b896e"
-    sha256 cellar: :any_skip_relocation, ventura:       "b758735b84214c75fa427dc24d4d13ec0682652616a3b211fb2e400edc621b9b"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "771b94de933523d1e07a7bee7efb2d6741b5683ad9c1513ed72d4d346f2c0eef"
-  end
 
   depends_on "meson" => :test
   depends_on "lld"
@@ -19,7 +13,6 @@ class KsysrootArmLinuxGnueabihf < Formula
   depends_on "pkgconf"
 
   uses_from_macos "libarchive"
-
   on_sonoma :or_older do
     # for sha256sum
     depends_on "coreutils"
@@ -203,6 +196,7 @@ class KsysrootArmLinuxGnueabihf < Formula
       # KSYSROOT_TRIPLE=arm-linux-gnueabihf KSYSROOT_FULL_TRIPLE=arm-linux6.1-gnueabihf
       # KSYSROOT_OSFLAVOUR=debian KSYSROOT_OSRELEASE=12
       # KSYSROOT_LINKER=ld.lld
+      # KSYSROOT_LICENSE=GPL-2.0-or-later
       # MESON_SYSTEM=linux MESON_CPUFAMILY=arm MESON_CPU=arm MESON_ENDIAN=little
       # DEBIAN_VERSION=12 DEBIAN_NAME=bookworm DEBIAN_GCC=12
       # DEBIAN_ARCH=armhf LINUX_VERSION=6.1
@@ -218,8 +212,8 @@ class KsysrootArmLinuxGnueabihf < Formula
   end
   test do
     resource "testcases" do
-      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
-      sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
+      url KsysrootArmLinuxGnueabihf.stable.url
+      sha256 KsysrootArmLinuxGnueabihf.stable.checksum.hexdigest
     end
     resource("testcases").stage do
       ENV.delete("CC")
@@ -238,18 +232,18 @@ class KsysrootArmLinuxGnueabihf < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # build a C library + program
+      # build a C library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
              "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
       assert_predicate testpath/"build-c/main", :exist?
 
-      # build a C++ library + program
+      # build a C++ library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
              "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
       assert_predicate testpath/"build-cxx/main", :exist?
-      # check pkg-config personality is proper
+      # check pkg-config personality is properly set-up
       assert_equal "-lcrypt", shell_output("#{bin}/arm-linux-gnueabihf-pkg-config --libs libcrypt").strip
       assert_equal "", shell_output("#{bin}/arm-linux-gnueabihf-pkg-config --cflags libcrypt").strip
     end
