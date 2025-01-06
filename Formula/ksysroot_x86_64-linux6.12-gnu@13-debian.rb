@@ -4,22 +4,20 @@ class KsysrootX8664Linux612GnuAT13Debian < Formula
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
   sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
   license "GPL-2.0-or-later"
+  revision 1
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
 
   keg_only :versioned_formula
-
   depends_on "meson" => :test
   depends_on "lld"
   depends_on "llvm"
   depends_on "pkgconf"
 
   uses_from_macos "libarchive"
-
   on_sonoma :or_older do
     # for sha256sum
     depends_on "coreutils"
   end
-
   on_linux do
     disable! date: "2024-01-01", because: "Unwanted system libraries"
   end
@@ -160,6 +158,7 @@ class KsysrootX8664Linux612GnuAT13Debian < Formula
       # KSYSROOT_TRIPLE=x86_64-linux-gnu KSYSROOT_FULL_TRIPLE=x86_64-linux6.12-gnu
       # KSYSROOT_OSFLAVOUR=debian KSYSROOT_OSRELEASE=13
       # KSYSROOT_LINKER=ld.lld
+      # KSYSROOT_LICENSE=GPL-2.0-or-later
       # MESON_SYSTEM=linux MESON_CPUFAMILY=x86_64 MESON_CPU=x86_64 MESON_ENDIAN=little
       # DEBIAN_VERSION=13 DEBIAN_NAME=trixie DEBIAN_GCC=14
       # DEBIAN_ARCH=amd64 LINUX_VERSION=6.12
@@ -175,8 +174,8 @@ class KsysrootX8664Linux612GnuAT13Debian < Formula
   end
   test do
     resource "testcases" do
-      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
-      sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
+      url KsysrootX8664Linux612GnuAT13Debian.stable.url
+      sha256 KsysrootX8664Linux612GnuAT13Debian.stable.checksum.hexdigest
     end
     resource("testcases").stage do
       ENV.delete("CC")
@@ -195,18 +194,18 @@ class KsysrootX8664Linux612GnuAT13Debian < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # build a C library + program
+      # build a C library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
              "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
       assert_predicate testpath/"build-c/main", :exist?
 
-      # build a C++ library + program
+      # build a C++ library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
              "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
       assert_predicate testpath/"build-cxx/main", :exist?
-      # check pkg-config personality is proper
+      # check pkg-config personality is properly set-up
       assert_equal "-lcrypt", shell_output("#{bin}/x86_64-linux-gnu-pkg-config --libs libcrypt").strip
       assert_equal "", shell_output("#{bin}/x86_64-linux-gnu-pkg-config --cflags libcrypt").strip
     end
