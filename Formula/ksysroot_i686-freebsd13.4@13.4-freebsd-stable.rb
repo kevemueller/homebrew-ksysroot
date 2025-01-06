@@ -1,23 +1,26 @@
 class KsysrootI686Freebsd134AT134FreebsdStable < Formula
   desc "Sysroot for i686-freebsd13.4@freebsd13.4-STABLE"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.1.tar.gz"
-  sha256 "65da7faaa17289fb4376f611df6f06f91abceaa1798562873094a4c426aacb2f"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
+  sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
   license "BSD-2-Clause"
   head "https://github.com/kevemueller/ksysroot.git", branch: "main"
 
   keg_only :versioned_formula
-
   depends_on "meson" => :test
   depends_on "lld"
   depends_on "llvm"
   depends_on "pkgconf"
 
   uses_from_macos "libarchive"
+  on_sonoma :or_older do
+    # for sha256sum
+    depends_on "coreutils"
+  end
 
   resource "base.txz" do
     url "https://download.freebsd.org/snapshots/i386/i386/13.4-STABLE/base.txz"
-    version "13.4-STABLE"
+    version "13.4-STABLE-ksr"
     sha256 "439c7421bed2abdaa8ab446065ac4c3835f267f29c4ec411e0ec8eaca2f82509"
   end
 
@@ -31,22 +34,23 @@ class KsysrootI686Freebsd134AT134FreebsdStable < Formula
       # KSYSROOT_TRIPLE=i686-freebsd13.4 KSYSROOT_FULL_TRIPLE=i686-freebsd13.4
       # KSYSROOT_OSFLAVOUR=freebsd KSYSROOT_OSRELEASE=13.4-STABLE
       # KSYSROOT_LINKER=ld.lld
+      # KSYSROOT_LICENSE=BSD-2-Clause
       # MESON_SYSTEM=freebsd MESON_CPUFAMILY=x86 MESON_CPU=x86 MESON_ENDIAN=little
       # FREEBSD_VERSION=13.4-STABLE FREEBSD_MACHINE=i386 FREEBSD_MACHINE_ARCH=i386
     EOS
     bom << resources.map { |r|
-      "#{r.name} #{r.version} #{r.url} #{r.cached_download.to_s.delete_prefix(cachedir)}"
+      "#{r.name} #{r.version.to_s.delete_suffix("-ksr")} #{r.url} " \
+        "#{r.cached_download.relative_path_from(cachedir)} #{r.checksum}"
     }.join("\n")
     bom << "\n"
     ohai "bom=#{bom}"
     File.write("bom.in", bom)
     system "./ksysroot.sh", "frombom", prefix, "bom.in"
   end
-
   test do
     resource "testcases" do
-      url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.1.tar.gz"
-      sha256 "65da7faaa17289fb4376f611df6f06f91abceaa1798562873094a4c426aacb2f"
+      url KsysrootI686Freebsd134AT134FreebsdStable.stable.url
+      sha256 KsysrootI686Freebsd134AT134FreebsdStable.stable.checksum.hexdigest
     end
     resource("testcases").stage do
       ENV.delete("CC")
@@ -65,19 +69,18 @@ class KsysrootI686Freebsd134AT134FreebsdStable < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # cross build a C library + program
+      # build a C library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
              "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
       assert_predicate testpath/"build-c/main", :exist?
 
-      # cross build a C++ library + program
+      # build a C++ library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
              "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
       assert_predicate testpath/"build-cxx/main", :exist?
-
-      # check pkg-config personality is proper
+      # check pkg-config personality is properly set-up
       assert_equal "-lcrypto", shell_output("#{bin}/i686-freebsd13.4-pkg-config --libs libcrypto").strip
       assert_equal "", shell_output("#{bin}/i686-freebsd13.4-pkg-config --cflags libcrypto").strip
     end
