@@ -1,19 +1,13 @@
 class KsysrootX8664Freebsd < Formula
   desc "Sysroot for x86_64-freebsd14.2@freebsd14.2-RELEASE"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
-  sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.7.1.tar.gz"
+  sha256 "023d15752c0908cabd9630b5356ec7d49f5890a5b5411157c4114c3b866cec7c"
   license "BSD-2-Clause"
-  head "https://github.com/kevemueller/ksysroot.git", branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "4a8eb4811fdce3b374b359bc350e47c7dc45553704c075b6f78552b320e0efcc"
-    sha256 cellar: :any_skip_relocation, ventura:       "10d0c4d0adb4aa280fe13d2b859b89d345468801cbbbe9e1ffcb6633cd830702"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "59aa8781c6b15b2c974d81cdc2c1df95e850f23f6a376bdc3f8d7cb601d35e05"
-  end
+  head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
   depends_on "meson" => :test
+  depends_on "ksysroot_native"
   depends_on "lld"
   depends_on "llvm"
   depends_on "pkgconf"
@@ -42,7 +36,7 @@ class KsysrootX8664Freebsd < Formula
       # KSYSROOT_LINKER=ld.lld
       # KSYSROOT_LICENSE=BSD-2-Clause
       # MESON_SYSTEM=freebsd MESON_CPUFAMILY=x86_64 MESON_CPU=x86_64 MESON_ENDIAN=little
-      # FREEBSD_VERSION=14.2-RELEASE FREEBSD_MACHINE=amd64 FREEBSD_MACHINE_ARCH=amd64
+      # FREEBSD_VERSION=14.2-RELEASE FREEBSD_KERNEL=14.2 FREEBSD_MACHINE=amd64 FREEBSD_MACHINE_ARCH=amd64
     EOS
     bom << resources.map { |r|
       "#{r.name} #{r.version.to_s.delete_suffix("-ksr")} #{r.url} " \
@@ -51,7 +45,13 @@ class KsysrootX8664Freebsd < Formula
     bom << "\n"
     ohai "bom=#{bom}"
     File.write("bom.in", bom)
-    system "./ksysroot.sh", "frombom", prefix, "bom.in"
+    link_triple="x86_64-freebsd"
+    system "./ksysroot.sh", "frombom", prefix, "bom.in", link_triple
+    rm prefix/"native.txt"
+    meson_cross = share/"meson/cross"
+    mkdir meson_cross
+    meson_cross.install prefix/"cross.txt" => "x86_64-freebsd14.2"
+    meson_cross.install_symlink meson_cross/"x86_64-freebsd14.2" => link_triple unless link_triple.empty?
   end
   test do
     resource "testcases" do
@@ -76,14 +76,14 @@ class KsysrootX8664Freebsd < Formula
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
       # build a C library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
+      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
+             "--cross-file=x86_64-freebsd14.2", testpath/"build-c", "test-c"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
       assert_predicate testpath/"build-c/main", :exist?
 
       # build a C++ library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
+      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
+             "--cross-file=x86_64-freebsd14.2", testpath/"build-cxx", "test-cxx"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
       assert_predicate testpath/"build-cxx/main", :exist?
       # check pkg-config personality is properly set-up
