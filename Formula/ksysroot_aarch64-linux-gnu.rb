@@ -4,14 +4,8 @@ class KsysrootAarch64LinuxGnu < Formula
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.7.1.tar.gz"
   sha256 "023d15752c0908cabd9630b5356ec7d49f5890a5b5411157c4114c3b866cec7c"
   license "GPL-2.0-or-later"
+  revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "c52e8c267db637702cf325e0236ed354b945e8b504657e801fccf07a0fe25db7"
-    sha256 cellar: :any_skip_relocation, ventura:       "6768003e75927dbb6dc487389d58bfbb56e52b771b8334166c3187b7fbee7a7f"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "984f15579fd44c25585a15b141e15fcb43508193809f2e7567ea461e88f7c679"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
@@ -281,8 +275,8 @@ class KsysrootAarch64LinuxGnu < Formula
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
       assert_predicate testpath/"build-cxx/main", :exist?
       # check pkg-config personality is properly set-up
-      assert_equal "-lcrypt", shell_output("#{bin}/aarch64-linux-gnu-pkg-config --libs libcrypt").strip
-      assert_equal "", shell_output("#{bin}/aarch64-linux-gnu-pkg-config --cflags libcrypt").strip
+      assert_equal "-lcrypt", shell_output("#{bin}/aarch64-linux6.1-gnu-pkg-config --libs libcrypt").strip
+      assert_equal "", shell_output("#{bin}/aarch64-linux6.1-gnu-pkg-config --cflags libcrypt").strip
     end
   end
 end
