@@ -1,11 +1,10 @@
 class KsysrootNative < Formula
   desc "Sysroot for native@macos15.2"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
-  sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.7.1.tar.gz"
+  sha256 "023d15752c0908cabd9630b5356ec7d49f5890a5b5411157c4114c3b866cec7c"
   license "BSD-2-Clause"
-  revision 2
-  head "https://github.com/kevemueller/ksysroot.git", branch: "main"
+  head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
   depends_on "meson" => :test
   depends_on "lld"
@@ -24,6 +23,8 @@ class KsysrootNative < Formula
     ENV["LLD_DIR"]=Formula["lld"].bin
     ENV["PKG_CONFIG"]="#{Formula["pkgconf"].bin}/pkg-config"
     system "./ksysroot.sh", "install", "native", prefix
+    mkdir "#{share}/meson/native"
+    share.install "#{prefix}/native.txt" => "meson/native/ksysroot"
   end
   test do
     resource "testcases" do
@@ -48,13 +49,13 @@ class KsysrootNative < Formula
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
       # build a C library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
+      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
              testpath/"build-c", "test-c"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
       assert_predicate testpath/"build-c/main", :exist?
 
       # build a C++ library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
+      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
              testpath/"build-cxx", "test-cxx"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
       assert_predicate testpath/"build-cxx/main", :exist?
