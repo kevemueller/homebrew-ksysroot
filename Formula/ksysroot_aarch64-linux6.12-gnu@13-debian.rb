@@ -1,14 +1,13 @@
 class KsysrootAarch64Linux612GnuAT13Debian < Formula
   desc "Sysroot for aarch64-linux-gnu@debian13"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
-  sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.7.1.tar.gz"
+  sha256 "023d15752c0908cabd9630b5356ec7d49f5890a5b5411157c4114c3b866cec7c"
   license "GPL-2.0-or-later"
-  revision 1
-  head "https://github.com/kevemueller/ksysroot.git", branch: "main"
+  head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
-  keg_only :versioned_formula
   depends_on "meson" => :test
+  depends_on "ksysroot_native"
   depends_on "lld"
   depends_on "llvm"
   depends_on "pkgconf"
@@ -20,21 +19,21 @@ class KsysrootAarch64Linux612GnuAT13Debian < Formula
   end
 
   resource "gcc-14-base" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/gcc-14-base_14.2.0-8_arm64.deb"
-    version "14.2.0-8-ksr"
-    sha256 "4e27267a200edbc10776af2485e7346e6df49e9eafecf7e213557d2e9b331a3e"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/gcc-14-base_14.2.0-12_arm64.deb"
+    version "14.2.0-12-ksr"
+    sha256 "a8a0fac7bda3ffa5dc18fb9f408de96f0215e8db84e2bb1ea0a70167ae4ceca4"
   end
 
   resource "libasan8" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libasan8_14.2.0-8_arm64.deb"
-    version "14.2.0-8-ksr"
-    sha256 "a7dca4d324bd81cf28d8f6a9e2600a6956d8a77c010e2b4cf170ae02ff6ab79e"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libasan8_14.2.0-12_arm64.deb"
+    version "14.2.0-12-ksr"
+    sha256 "a498659c6d492b8186986ddffd4078bee80d14f48b0222021571217dccada698"
   end
 
   resource "libatomic1" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libatomic1_14.2.0-8_arm64.deb"
-    version "14.2.0-8-ksr"
-    sha256 "d03c77f6123c554cc9e803c16903c46fbf78c4e3c2e5817898a9db1ed02927bb"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libatomic1_14.2.0-12_arm64.deb"
+    version "14.2.0-12-ksr"
+    sha256 "a06ceccbfd0b707145263c983efbbf6550aa6f4589ef6ce0f03312b61de89d60"
   end
 
   resource "libc-dev-bin" do
@@ -68,63 +67,63 @@ class KsysrootAarch64Linux612GnuAT13Debian < Formula
   end
 
   resource "libgcc-14-dev" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libgcc-14-dev_14.2.0-8_arm64.deb"
-    version "14.2.0-8-ksr"
-    sha256 "fa037240130df2e4b86b6f97aa3b5dad918d17836cd4f6acc18fd972d1914bde"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libgcc-14-dev_14.2.0-12_arm64.deb"
+    version "14.2.0-12-ksr"
+    sha256 "c6cd62b730fb50ba1cc9a35d22ba15953605783856fca2d50c07eab9775046de"
   end
 
   resource "libgcc-s1" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libgcc-s1_14.2.0-8_arm64.deb"
-    version "14.2.0-8-ksr"
-    sha256 "6445712bdaaba59c1e130e1d6afbfc5fcd1e261dec4c353169525550b26a0e34"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libgcc-s1_14.2.0-12_arm64.deb"
+    version "14.2.0-12-ksr"
+    sha256 "91e6c1b245862fc833f6ce37c53b851a0ddb38b045b0652d4835d3da9c568b47"
   end
 
   resource "libgomp1" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libgomp1_14.2.0-8_arm64.deb"
-    version "14.2.0-8-ksr"
-    sha256 "d70a577663e390964dd6b618e3de34d0a99aeb1d6d39673e6615de3fb1cf0d6d"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libgomp1_14.2.0-12_arm64.deb"
+    version "14.2.0-12-ksr"
+    sha256 "d98d7de2368dd89058360dd8e04753fe0529104fd7628a8fd7be9476ea496383"
   end
 
   resource "libhwasan0" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libhwasan0_14.2.0-8_arm64.deb"
-    version "14.2.0-8-ksr"
-    sha256 "d5ae3bd37c703ecd6aa7e16a1d2a8b1bfd3a7147ff73afffcf3d9cb7ee72da3a"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libhwasan0_14.2.0-12_arm64.deb"
+    version "14.2.0-12-ksr"
+    sha256 "e0ec0dd2a432cfdd63cc3ff880a09c95076066804c250af4e213369d3a666de8"
   end
 
   resource "libitm1" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libitm1_14.2.0-8_arm64.deb"
-    version "14.2.0-8-ksr"
-    sha256 "9ccafabcda8bf89da4c13f818c97566d205a0f985c8f8e1893918c907829b6d6"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libitm1_14.2.0-12_arm64.deb"
+    version "14.2.0-12-ksr"
+    sha256 "db76d862ef9366addf17ed3679f9f9ec4a9282b4a051aab81aaa7833f84f05b9"
   end
 
   resource "liblsan0" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/liblsan0_14.2.0-8_arm64.deb"
-    version "14.2.0-8-ksr"
-    sha256 "5b33af12b7aa1986193f98b3f1c472c876aa10b690a8cfdf6c9abead40bbb572"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/liblsan0_14.2.0-12_arm64.deb"
+    version "14.2.0-12-ksr"
+    sha256 "778941055051c2cf079c0460be038f3fce700477d56e226001ac5c272c8f37ea"
   end
 
   resource "libstdc++-14-dev" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libstdc++-14-dev_14.2.0-8_arm64.deb"
-    version "14.2.0-8-ksr"
-    sha256 "6c315aeabbf9b379185a8a29131a88f6a0784f799b465f3c88a71cd1f31da97b"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libstdc++-14-dev_14.2.0-12_arm64.deb"
+    version "14.2.0-12-ksr"
+    sha256 "42d50b20027f1fac3e043114a1f623ae290cebf37b0741bedfd54218c09895fb"
   end
 
   resource "libstdc++6" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libstdc++6_14.2.0-8_arm64.deb"
-    version "14.2.0-8-ksr"
-    sha256 "302e35067f9b2bdc9991c1cbdcec1ec5a2ea2ef56ae6e9538bbaafff784f1ec0"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libstdc++6_14.2.0-12_arm64.deb"
+    version "14.2.0-12-ksr"
+    sha256 "cd4e8215d48c32d5ac54f83508105b84bb32686095e72fdfa488048dd38cc207"
   end
 
   resource "libtsan2" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libtsan2_14.2.0-8_arm64.deb"
-    version "14.2.0-8-ksr"
-    sha256 "8d5770e382a95d11cab27b0807993f2f5f778b3f91b6f497f8647e5fa6be28f1"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libtsan2_14.2.0-12_arm64.deb"
+    version "14.2.0-12-ksr"
+    sha256 "de2a05925736c0e8d68dfeb43e225969a0ee697289be2bec99baf243028198f6"
   end
 
   resource "libubsan1" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libubsan1_14.2.0-8_arm64.deb"
-    version "14.2.0-8-ksr"
-    sha256 "868bfd970f4478d55bbbb4995bb7f60d25e303473b68cf043df480cff199d778"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libubsan1_14.2.0-12_arm64.deb"
+    version "14.2.0-12-ksr"
+    sha256 "94d82a8eae45300dfc556130a64d69f6ddaf207330e440a3d5616f8a1b2133fd"
   end
 
   resource "linux-libc-dev" do
@@ -161,7 +160,13 @@ class KsysrootAarch64Linux612GnuAT13Debian < Formula
     bom << "\n"
     ohai "bom=#{bom}"
     File.write("bom.in", bom)
-    system "./ksysroot.sh", "frombom", prefix, "bom.in"
+    link_triple=""
+    system "./ksysroot.sh", "frombom", prefix, "bom.in", link_triple
+    rm prefix/"native.txt"
+    meson_cross = share/"meson/cross"
+    mkdir meson_cross
+    meson_cross.install prefix/"cross.txt" => "aarch64-linux6.12-gnu"
+    meson_cross.install_symlink meson_cross/"aarch64-linux6.12-gnu" => link_triple unless link_triple.empty?
   end
   test do
     resource "testcases" do
@@ -186,19 +191,19 @@ class KsysrootAarch64Linux612GnuAT13Debian < Formula
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
       # build a C library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
+      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
+             "--cross-file=aarch64-linux6.12-gnu", testpath/"build-c", "test-c"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
       assert_predicate testpath/"build-c/main", :exist?
 
       # build a C++ library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
+      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
+             "--cross-file=aarch64-linux6.12-gnu", testpath/"build-cxx", "test-cxx"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
       assert_predicate testpath/"build-cxx/main", :exist?
       # check pkg-config personality is properly set-up
-      assert_equal "-lcrypt", shell_output("#{bin}/aarch64-linux-gnu-pkg-config --libs libcrypt").strip
-      assert_equal "", shell_output("#{bin}/aarch64-linux-gnu-pkg-config --cflags libcrypt").strip
+      assert_equal "-lcrypt", shell_output("#{bin}/aarch64-linux6.12-gnu-pkg-config --libs libcrypt").strip
+      assert_equal "", shell_output("#{bin}/aarch64-linux6.12-gnu-pkg-config --cflags libcrypt").strip
     end
   end
 end
