@@ -1,19 +1,13 @@
 class KsysrootX8664LinuxGnu < Formula
   desc "Sysroot for x86_64-linux-gnu@debian12"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
-  sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.7.1.tar.gz"
+  sha256 "023d15752c0908cabd9630b5356ec7d49f5890a5b5411157c4114c3b866cec7c"
   license "GPL-2.0-or-later"
-  revision 1
-  head "https://github.com/kevemueller/ksysroot.git", branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "0407444a25b51f8368ecf5f381e7532fb304219286c0fa82604def512d2cc0a9"
-    sha256 cellar: :any_skip_relocation, ventura:       "05e1d39023d82d21ef6da3905e5f3197f44ddac679a2c215e3461d103679debe"
-  end
+  head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
   depends_on "meson" => :test
+  depends_on "ksysroot_native"
   depends_on "lld"
   depends_on "llvm"
   depends_on "pkgconf"
@@ -241,7 +235,13 @@ class KsysrootX8664LinuxGnu < Formula
     bom << "\n"
     ohai "bom=#{bom}"
     File.write("bom.in", bom)
-    system "./ksysroot.sh", "frombom", prefix, "bom.in"
+    link_triple="x86_64-linux-gnu"
+    system "./ksysroot.sh", "frombom", prefix, "bom.in", link_triple
+    rm prefix/"native.txt"
+    meson_cross = share/"meson/cross"
+    mkdir meson_cross
+    meson_cross.install prefix/"cross.txt" => "x86_64-linux6.1-gnu"
+    meson_cross.install_symlink meson_cross/"x86_64-linux6.1-gnu" => link_triple unless link_triple.empty?
   end
   test do
     resource "testcases" do
@@ -266,19 +266,19 @@ class KsysrootX8664LinuxGnu < Formula
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
       # build a C library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
+      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
+             "--cross-file=x86_64-linux6.1-gnu", testpath/"build-c", "test-c"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
       assert_predicate testpath/"build-c/main", :exist?
 
       # build a C++ library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
+      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
+             "--cross-file=x86_64-linux6.1-gnu", testpath/"build-cxx", "test-cxx"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
       assert_predicate testpath/"build-cxx/main", :exist?
       # check pkg-config personality is properly set-up
-      assert_equal "-lcrypt", shell_output("#{bin}/x86_64-linux-gnu-pkg-config --libs libcrypt").strip
-      assert_equal "", shell_output("#{bin}/x86_64-linux-gnu-pkg-config --cflags libcrypt").strip
+      assert_equal "-lcrypt", shell_output("#{bin}/x86_64-linux6.1-gnu-pkg-config --libs libcrypt").strip
+      assert_equal "", shell_output("#{bin}/x86_64-linux6.1-gnu-pkg-config --cflags libcrypt").strip
     end
   end
 end
