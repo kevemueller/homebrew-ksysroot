@@ -9,6 +9,7 @@ on:
 jobs:
   test-bot:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-22.04, macos-13, macos-15]
     runs-on: ${{ matrix.os }}
@@ -31,8 +32,8 @@ jobs:
       - run: brew test-bot --only-tap-syntax
 
       - run: |
-          brew test-bot --only-formulae --root-url='https://ghcr.io/v2/kevemueller/ksysroot' | tee test-bot.log
-          ! grep -E 'failed steps? ignored' test-bot.log
+          brew test-bot --only-formulae --root-url='https://ghcr.io/v2/kevemueller/ksysroot' | tee test-bot.log 
+          ! grep -E 'failed steps? ignored|Error:' test-bot.log
         if: github.event_name == 'pull_request'
 
       - name: Upload bottles as artifact
