@@ -4,6 +4,7 @@ class Pkg < Formula
   url "https://github.com/freebsd/pkg.git", using: :git, branch: "main"
   version "1.21.99.6"
   license "BSD-2-Clause"
+  revision 1
   head "https://github.com/freebsd/pkg.git", branch: "main"
 
   bottle do
@@ -66,6 +67,14 @@ class Pkg < Formula
       }
     EOS
     File.write(etcrepos/"FreeBSDbase-Latest.conf", base)
+    dfly = <<~EOS
+      DragonFlyBSD: {
+            url             : https://pkg.dragonflybsd.org/pkg/${ABI}/LATEST
+            mirror_type     : HTTP
+            enabled         : yes
+        }
+    EOS
+    File.write(etcrepos/"DragonFlyBSD.conf", dfly)
   end
 
   def caveats
@@ -87,7 +96,11 @@ class Pkg < Formula
       in order to point at the right pkg repository.
       As this version ships with multiple enabled repositories, it is recommended to select one
       on the command-line:
-        {update|install} -r {FreeBSD-Latest|FreeBSD-Quarterly|FreeBSDbase-Latest}.
+        {update|install} -r {FreeBSD-Latest|FreeBSD-Quarterly|FreeBSDbase-Latest}
+
+      Or for DragonFlyBSD:
+        -o ABI=dragonfly:6.6:x86:64
+        {update|install} -r DragonFlyBSD
 
       Feedback is welcome at https://github.com/kevemueller/homebrew-ksysroot.
 
