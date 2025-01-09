@@ -6,6 +6,13 @@ class Pkg < Formula
   license "BSD-2-Clause"
   head "https://github.com/freebsd/pkg.git", branch: "main"
 
+  bottle do
+    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
+    sha256 arm64_sequoia: "ec540d73b15238485c2bf2031df50496a03a5f16ccf584ce1d8f55ff7d489f39"
+    sha256 ventura:       "f2a863c38d63f2b37e7a00b5cc5296b2f448129cb84df1351c50538bb5a7deba"
+    sha256 x86_64_linux:  "dec355042dde5a103663c339e3c4ed98935466239abbb8bd56e358dda0c51f3b"
+  end
+
   depends_on "pkgconf" => :build
   depends_on "libarchive"
   depends_on "libbsd"
