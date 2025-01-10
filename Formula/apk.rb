@@ -18,6 +18,13 @@ class Apk < Formula
   license "GPL-2.0-or-later"
   head "https://gitlab.alpinelinux.org/alpine/apk-tools.git", branch: "master"
 
+  bottle do
+    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
+    sha256 cellar: :any, arm64_sequoia: "f085aff41ecff06533d8061bee4e20a41098a72562a28a72ea34f6c9e2313751"
+    sha256 cellar: :any, ventura:       "d44b3f56213623c1f9675dc76186ce1127d598bc7a15315f87a7572bfa697d5a"
+    sha256               x86_64_linux:  "ecab2884c504ce2b545ffb8469eb43b62e135723a8a8ddc2cfe5943fe2eedf1b"
+  end
+
   depends_on "cmocka" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
