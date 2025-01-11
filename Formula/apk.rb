@@ -1,12 +1,3 @@
-class ApkDownloadStrategy < CurlDownloadStrategy
-  def stage(&block)
-    UnpackStrategy::Tar.new(cached_location)
-                       .extract_nestedly(basename:,
-                                         verbose:  verbose? && !quiet?)
-    chdir(&block) if block
-  end
-end
-
 class Apk < Formula
   desc "Alpine package manager"
   homepage "https://gitlab.alpinelinux.org/alpine/apk-tools"
@@ -16,6 +7,7 @@ class Apk < Formula
   url "https://gitlab.alpinelinux.org/alpine/apk-tools.git", branch: "master"
   version "2.9.99"
   license "GPL-2.0-or-later"
+  revision 1
   head "https://gitlab.alpinelinux.org/alpine/apk-tools.git", branch: "master"
 
   bottle do
@@ -36,26 +28,15 @@ class Apk < Formula
   depends_on "zstd"
   uses_from_macos "zlib"
 
-  resource "alpine-keys" do
-    url "https://dl-cdn.alpinelinux.org/alpine/v3.21/main/aarch64/alpine-keys-2.5-r0.apk", using: ApkDownloadStrategy
-    sha256 "a70d3c55ee676d7d670714aa729285d5ab6fcf18146eb03e05319098bcb715c0"
-  end
-
   patch :p1, :DATA
 
   # TODO: add lua-zlib (https://github.com/brimworks/lua-zlib)
-  # set arbitrary arch
-
   def install
     File.write("VERSION", "2.9.99")
     system "meson", "setup", "-Dlua_version=5.4", "-Dcompressed-help=false", "-Darch=aarch64",
            *std_meson_args, "builddir"
     system "meson", "compile", "-C", "builddir"
     system "meson", "install", "-C", "builddir"
-    apk_keys=prefix/"etc/apk/keys"
-    resource("alpine-keys").stage do
-      apk_keys.install Dir["usr/share/apk/keys/*.pub"]
-    end
     bin.install "apk-mkroot.sh" => "apk-mkroot"
   end
 
@@ -66,9 +47,9 @@ class Apk < Formula
         #{name} -p my-apk-root
 
       The root must have certain directories and files already pre-populated for #{name} to work.
-      This version includes a simple wrapper apk-mkroot that creates a suitable directory structure
+      This version includes a simple helper apk-mkroot that creates a suitable directory structure
       for #{name} to run.
-        apk-mkroot <my-apk-root-directory> [<alpine-version:-3.21>] [<alpine-arch:-aarch64>]
+        apk-mkroot -r v3.21 -a armv7 my-apk-root-directory [my-additional-initial-contraints...]
     EOS
   end
 
@@ -77,38 +58,67 @@ class Apk < Formula
   end
 end
 __END__
---- /dev/null	2025-01-10 14:52:11
-+++ ./apk-mkroot.sh	2025-01-10 14:51:38
-@@ -0,0 +1,32 @@
+--- /dev/null	2025-01-11 21:36:59
++++ ./apk-mkroot.sh	2025-01-11 21:34:09
+@@ -0,0 +1,61 @@
 +#!/bin/sh
 +set -e
 +
++: "${ALPINE_BRANCH:=v3.21}"
++: "${ALPINE_ARCH:=$(apk --print-arch)}"
++
 +usage() {
 +  echo "Usage:"
-+  echo "  $0 <apk-root-directory> [<Alpine version:-3.21>] [<Alpine architecture:-aarch64>]"
++  echo "  $0 [-r <branch>] [-a <architecture>] <apk-root-dir> [...]"
++  echo "Where:"
++  echo "  branch        is the Alpine branch to use, defaults to ${ALPINE_BRANCH}"
++  echo "  architecture  is the Alpine architecture to use, defaults to ${ALPINE_ARCH}"
++  echo "  apk-root-dir  is the root directory to initialize"
++  echo "  ...           are additional CONSTRAINTS to ensure"
++  echo "Environment:"
++  echo "  ALPINE_BRANCH use this branch as the default"
++  echo "  ALPINE_ARCH   use this arch as the default"
 +}
 +
 +if [ $# -lt 1 ]
 +then
 +  usage
-+  exit 1
++  exit 2
 +fi
 +
-+APK_ROOT="$1"
-+ALPINE_VERSION="${2:-3.21}"
-+ALPINE_ARCH="${3:-aarch64}"
-+
-+for i in lib/apk/db lib/apk/exec var/log var/cache etc
++while getopts 'r:a:' opt
 +do
-+  mkdir -p "${APK_ROOT}/${i}"
++  case "${opt}" in
++    r)
++      ALPINE_BRANCH="${OPTARG}"
++      ;;
++    a)
++      ALPINE_ARCH="${OPTARG}"
++      ;;
++    *)
++      1>&1 echo Unrecognized option "${opt}"
++      usage
++      exit 2
++      ;;
++  esac
 +done
++shift $((OPTIND - 1))
++APK_ROOT="$1"
++shift
 +
-+cp -aL /usr/local/etc/apk "${APK_ROOT}"/etc
++# bootstrap alpine-keys untrusted from https
++apk --root "${APK_ROOT}" --arch "${ALPINE_ARCH}" \
++  --repository "https://dl-cdn.alpinelinux.org/alpine/${ALPINE_BRANCH}/main" \
++  --allow-untrusted --update-cache --no-interactive \
++  add --initdb --usermode --no-scripts \
++  alpine-keys
 +
-+touch "${APK_ROOT}"/etc/apk/world
-+echo "${ALPINE_ARCH}" >"${APK_ROOT}"/etc/apk/arch
-+
++# set standard repositories
 +cat >"${APK_ROOT}"/etc/apk/repositories <<EOF
-+http://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/main
-+http://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/community
++http://dl-cdn.alpinelinux.org/alpine/${ALPINE_BRANCH}/main
++# http://dl-cdn.alpinelinux.org/alpine/${ALPINE_BRANCH}/community
 +EOF
++
++# ensure we re-create the index with verification, potentially adding more constraints
++apk --root "${APK_ROOT}" --update-cache \
++  add --usermode --no-scripts "$@"
