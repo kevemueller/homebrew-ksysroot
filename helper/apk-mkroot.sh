@@ -1,32 +1,61 @@
 #!/bin/sh
 set -e
 
+: "${ALPINE_BRANCH:=v3.21}"
+: "${ALPINE_ARCH:=$(apk --print-arch)}"
+
 usage() {
   echo "Usage:"
-  echo "  $0 <apk-root-directory> [<Alpine version:-3.21>] [<Alpine architecture:-aarch64>]"
+  echo "  $0 [-r <branch>] [-a <architecture>] <apk-root-dir> [...]"
+  echo "Where:"
+  echo "  branch        is the Alpine branch to use, defaults to ${ALPINE_BRANCH}"
+  echo "  architecture  is the Alpine architecture to use, defaults to ${ALPINE_ARCH}"
+  echo "  apk-root-dir  is the root directory to initialize"
+  echo "  ...           are additional CONSTRAINTS to ensure"
+  echo "Environment:"
+  echo "  ALPINE_BRANCH use this branch as the default"
+  echo "  ALPINE_ARCH   use this arch as the default"
 }
 
 if [ $# -lt 1 ]
 then
   usage
-  exit 1
+  exit 2
 fi
 
-APK_ROOT="$1"
-ALPINE_VERSION="${2:-3.21}"
-ALPINE_ARCH="${3:-aarch64}"
-
-for i in lib/apk/db lib/apk/exec var/log var/cache etc
+while getopts 'r:a:' opt
 do
-  mkdir -p "${APK_ROOT}/${i}"
+  case "${opt}" in
+    r)
+      ALPINE_BRANCH="${OPTARG}"
+      ;;
+    a)
+      ALPINE_ARCH="${OPTARG}"
+      ;;
+    *)
+      1>&1 echo Unrecognized option "${opt}"
+      usage
+      exit 2
+      ;;
+  esac
 done
+shift $((OPTIND - 1))
+APK_ROOT="$1"
+shift
 
-cp -aL /usr/local/etc/apk "${APK_ROOT}"/etc
+# bootstrap alpine-keys untrusted from https
+apk --root "${APK_ROOT}" --arch "${ALPINE_ARCH}" \
+  --repository "https://dl-cdn.alpinelinux.org/alpine/${ALPINE_BRANCH}/main" \
+  --allow-untrusted --update-cache --no-interactive \
+  add --initdb --usermode --no-scripts \
+  alpine-keys
 
-touch "${APK_ROOT}"/etc/apk/world
-echo "${ALPINE_ARCH}" >"${APK_ROOT}"/etc/apk/arch
-
+# set standard repositories
 cat >"${APK_ROOT}"/etc/apk/repositories <<EOF
-http://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/main
-http://dl-cdn.alpinelinux.org/alpine/v${ALPINE_VERSION}/community
+http://dl-cdn.alpinelinux.org/alpine/${ALPINE_BRANCH}/main
+# http://dl-cdn.alpinelinux.org/alpine/${ALPINE_BRANCH}/community
 EOF
+
+# ensure we re-create the index with verification, potentially adding more constraints
+apk --root "${APK_ROOT}" --update-cache \
+  add --usermode --no-scripts "$@"
