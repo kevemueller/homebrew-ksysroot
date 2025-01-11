@@ -12,9 +12,9 @@ class Apk < Formula
 
   bottle do
     root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any, arm64_sequoia: "f085aff41ecff06533d8061bee4e20a41098a72562a28a72ea34f6c9e2313751"
-    sha256 cellar: :any, ventura:       "d44b3f56213623c1f9675dc76186ce1127d598bc7a15315f87a7572bfa697d5a"
-    sha256               x86_64_linux:  "ecab2884c504ce2b545ffb8469eb43b62e135723a8a8ddc2cfe5943fe2eedf1b"
+    sha256 cellar: :any, arm64_sequoia: "b8b1599be6dbbdcb97a7bf0bae597e4d308f7e2e05e3ac990c534c3827ce4d51"
+    sha256 cellar: :any, ventura:       "ed115a203e740819f03fdbdd1b1d8481b290ffa5a620ee629dcf7106c4303179"
+    sha256               x86_64_linux:  "20c68999fe553f83f57901cf46b18658b708ec99b444beccd7baef43fe3587d1"
   end
 
   depends_on "cmocka" => :build
