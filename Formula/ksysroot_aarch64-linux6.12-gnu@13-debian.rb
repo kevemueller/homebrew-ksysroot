@@ -1,8 +1,8 @@
 class KsysrootAarch64Linux612GnuAT13Debian < Formula
-  desc "Sysroot for aarch64-linux-gnu@debian13"
+  desc "Sysroot for aarch64-linux-gnu@Debian13"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.7.1.tar.gz"
-  sha256 "023d15752c0908cabd9630b5356ec7d49f5890a5b5411157c4114c3b866cec7c"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
+  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
   license "GPL-2.0-or-later"
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
@@ -37,21 +37,21 @@ class KsysrootAarch64Linux612GnuAT13Debian < Formula
   end
 
   resource "libc-dev-bin" do
-    url "http://deb.debian.org/debian/pool/main/g/glibc/libc-dev-bin_2.40-4_arm64.deb"
-    version "2.40-4-ksr"
-    sha256 "e041145d10f67e0cc3f03b96d49a4f72aab59d8f940d34a95234d05f8faf2d1a"
+    url "http://deb.debian.org/debian/pool/main/g/glibc/libc-dev-bin_2.40-5_arm64.deb"
+    version "2.40-5-ksr"
+    sha256 "d9039cc7f724c1caabd458c761ddc90914bd0990f60e7f9e2415ae3274d53d30"
   end
 
   resource "libc6" do
-    url "http://deb.debian.org/debian/pool/main/g/glibc/libc6_2.40-4_arm64.deb"
-    version "2.40-4-ksr"
-    sha256 "dd67788a5f04468b6c46a942f6f32625cae5f16c1c78f876569243238028f3fc"
+    url "http://deb.debian.org/debian/pool/main/g/glibc/libc6_2.40-5_arm64.deb"
+    version "2.40-5-ksr"
+    sha256 "3f8808a78639512246729107138fc80f962390289abc47204c64e2b241542a56"
   end
 
   resource "libc6-dev" do
-    url "http://deb.debian.org/debian/pool/main/g/glibc/libc6-dev_2.40-4_arm64.deb"
-    version "2.40-4-ksr"
-    sha256 "740a526f7776d9bebf9af92ef3cb3a865ab495c8601c23fb563f1d245fab2ca1"
+    url "http://deb.debian.org/debian/pool/main/g/glibc/libc6-dev_2.40-5_arm64.deb"
+    version "2.40-5-ksr"
+    sha256 "1706a98c77e90dc30572ea753a0f32658ffaa49d7ed2470c18d8d6d1a1741905"
   end
 
   resource "libcrypt-dev" do
@@ -146,7 +146,7 @@ class KsysrootAarch64Linux612GnuAT13Debian < Formula
     ENV["PKG_CONFIG"]="#{Formula["pkgconf"].bin}/pkg-config"
     bom = <<~EOS
       # KSYSROOT_TRIPLE=aarch64-linux-gnu KSYSROOT_FULL_TRIPLE=aarch64-linux6.12-gnu
-      # KSYSROOT_OSFLAVOUR=debian KSYSROOT_OSRELEASE=13
+      # KSYSROOT_OSFLAVOUR=Debian KSYSROOT_OSRELEASE=13
       # KSYSROOT_LINKER=ld.lld
       # KSYSROOT_LICENSE=GPL-2.0-or-later
       # MESON_SYSTEM=linux MESON_CPUFAMILY=aarch64 MESON_CPU=aarch64 MESON_ENDIAN=little
@@ -158,7 +158,6 @@ class KsysrootAarch64Linux612GnuAT13Debian < Formula
         "#{r.cached_download.relative_path_from(cachedir)} #{r.checksum}"
     }.join("\n")
     bom << "\n"
-    ohai "bom=#{bom}"
     File.write("bom.in", bom)
     link_triple=""
     system "./ksysroot.sh", "frombom", prefix, "bom.in", link_triple
@@ -190,17 +189,13 @@ class KsysrootAarch64Linux612GnuAT13Debian < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # build a C library + program with meson
+      # build a C and C++ library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
-             "--cross-file=aarch64-linux6.12-gnu", testpath/"build-c", "test-c"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
-      assert_predicate testpath/"build-c/main", :exist?
-
-      # build a C++ library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
-             "--cross-file=aarch64-linux6.12-gnu", testpath/"build-cxx", "test-cxx"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
-      assert_predicate testpath/"build-cxx/main", :exist?
+             "--cross-file=aarch64-linux6.12-gnu", testpath/"build"
+      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
+      # test for the executables
+      assert_predicate testpath/"build/test-c/main", :exist?
+      assert_predicate testpath/"build/test-cxx/main", :exist?
       # check pkg-config personality is properly set-up
       assert_equal "-lcrypt", shell_output("#{bin}/aarch64-linux6.12-gnu-pkg-config --libs libcrypt").strip
       assert_equal "", shell_output("#{bin}/aarch64-linux6.12-gnu-pkg-config --cflags libcrypt").strip
