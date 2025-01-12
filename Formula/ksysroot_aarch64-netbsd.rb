@@ -7,6 +7,13 @@ class KsysrootAarch64Netbsd < Formula
   revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
+  bottle do
+    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e08a968740a839af26cdccb006df654d7326567738aa1a83cf5c03da4aca69a4"
+    sha256 cellar: :any_skip_relocation, ventura:       "928c5eadc8c7902c8577ad453f4a196cbf264812e10e295cfda403cb647d28a1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f11f0aa1fe2a9c99c1a31c8c9415b254937d84a62f788c7f4a91a0defba7eeeb"
+  end
+
   depends_on "meson" => :test
   depends_on "ksysroot_native"
   depends_on "lld"
