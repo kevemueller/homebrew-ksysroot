@@ -1,20 +1,13 @@
 class KsysrootI386LinuxGnu < Formula
-  desc "Sysroot for i386-linux-gnu@debian12"
+  desc "Sysroot for i386-linux-gnu@Debian12"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
-  sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
+  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
   license "GPL-2.0-or-later"
-  revision 1
-  head "https://github.com/kevemueller/ksysroot.git", branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "380ce23cebd365aaddb4f3479fe1e884b5bb61a9944d79c4889930968d7e8f73"
-    sha256 cellar: :any_skip_relocation, ventura:       "5c34d3894c1cc5e780cdcdf477860b038a202a4d86a128c2c4b159b2f1fc63d3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f4f773ecb07b80630656cff84adfa801983d19411fc18b8ed65574e87021e7e2"
-  end
+  head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
   depends_on "meson" => :test
+  depends_on "ksysroot_native"
   depends_on "lld"
   depends_on "llvm"
   depends_on "pkgconf"
@@ -194,9 +187,9 @@ class KsysrootI386LinuxGnu < Formula
   end
 
   resource "linux-libc-dev" do
-    url "http://deb.debian.org/debian/pool/main/l/linux/linux-libc-dev_6.1.115-1_i386.deb"
-    version "6.1.115-1-ksr"
-    sha256 "e904c629a777539713cdc2ba757ad8ea6c04e79b60f95384eb9d054b60e2d11a"
+    url "http://deb.debian.org/debian/pool/main/l/linux/linux-libc-dev_6.1.123-1_i386.deb"
+    version "6.1.123-1-ksr"
+    sha256 "91d846de5beeebf898ccf794a149f7be23b84b3631b7376b59d8fab18cb24d5e"
   end
 
   resource "rpcsvc-proto" do
@@ -213,7 +206,7 @@ class KsysrootI386LinuxGnu < Formula
     ENV["PKG_CONFIG"]="#{Formula["pkgconf"].bin}/pkg-config"
     bom = <<~EOS
       # KSYSROOT_TRIPLE=i386-linux-gnu KSYSROOT_FULL_TRIPLE=i386-linux6.1-gnu
-      # KSYSROOT_OSFLAVOUR=debian KSYSROOT_OSRELEASE=12
+      # KSYSROOT_OSFLAVOUR=Debian KSYSROOT_OSRELEASE=12
       # KSYSROOT_LINKER=ld.lld
       # KSYSROOT_LICENSE=GPL-2.0-or-later
       # MESON_SYSTEM=linux MESON_CPUFAMILY=x86 MESON_CPU=x86 MESON_ENDIAN=little
@@ -225,9 +218,14 @@ class KsysrootI386LinuxGnu < Formula
         "#{r.cached_download.relative_path_from(cachedir)} #{r.checksum}"
     }.join("\n")
     bom << "\n"
-    ohai "bom=#{bom}"
     File.write("bom.in", bom)
-    system "./ksysroot.sh", "frombom", prefix, "bom.in"
+    link_triple="i386-linux-gnu"
+    system "./ksysroot.sh", "frombom", prefix, "bom.in", link_triple
+    rm prefix/"native.txt"
+    meson_cross = share/"meson/cross"
+    mkdir meson_cross
+    meson_cross.install prefix/"cross.txt" => "i386-linux6.1-gnu"
+    meson_cross.install_symlink meson_cross/"i386-linux6.1-gnu" => link_triple unless link_triple.empty?
   end
   test do
     resource "testcases" do
@@ -251,20 +249,16 @@ class KsysrootI386LinuxGnu < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # build a C library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
-      assert_predicate testpath/"build-c/main", :exist?
-
-      # build a C++ library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
-      assert_predicate testpath/"build-cxx/main", :exist?
+      # build a C and C++ library + program with meson
+      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
+             "--cross-file=i386-linux6.1-gnu", testpath/"build"
+      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
+      # test for the executables
+      assert_predicate testpath/"build/test-c/main", :exist?
+      assert_predicate testpath/"build/test-cxx/main", :exist?
       # check pkg-config personality is properly set-up
-      assert_equal "-lcrypt", shell_output("#{bin}/i386-linux-gnu-pkg-config --libs libcrypt").strip
-      assert_equal "", shell_output("#{bin}/i386-linux-gnu-pkg-config --cflags libcrypt").strip
+      assert_equal "-lcrypt", shell_output("#{bin}/i386-linux6.1-gnu-pkg-config --libs libcrypt").strip
+      assert_equal "", shell_output("#{bin}/i386-linux6.1-gnu-pkg-config --cflags libcrypt").strip
     end
   end
 end
