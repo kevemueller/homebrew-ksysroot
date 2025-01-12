@@ -1,20 +1,13 @@
 class KsysrootMips64elLinuxGnuabi64 < Formula
-  desc "Sysroot for mips64el-linux-gnuabi64@debian12"
+  desc "Sysroot for mips64el-linux-gnuabi64@Debian12"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
-  sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
+  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
   license "GPL-2.0-or-later"
-  revision 1
-  head "https://github.com/kevemueller/ksysroot.git", branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "17c2c15ff1a17192c9d71d979d37b6895b0474beba157ddfcae1e58983de308e"
-    sha256 cellar: :any_skip_relocation, ventura:       "65172963ba971e3d0dcb8322c68915269f01f5c9624407644bb7a9d931f41502"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f6142427c1893f9af11701775c18b7e23342317fc63e0c83dc3f730079f196e8"
-  end
+  head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
   depends_on "meson" => :test
+  depends_on "ksysroot_native"
   depends_on "lld"
   depends_on "llvm"
   depends_on "pkgconf"
@@ -170,9 +163,9 @@ class KsysrootMips64elLinuxGnuabi64 < Formula
   end
 
   resource "linux-libc-dev" do
-    url "http://deb.debian.org/debian/pool/main/l/linux/linux-libc-dev_6.1.115-1_mips64el.deb"
-    version "6.1.115-1-ksr"
-    sha256 "0687c254b38776fdc251f8a070ecdad5f3d9957e18a7ad38261abd76a17206a8"
+    url "http://deb.debian.org/debian/pool/main/l/linux/linux-libc-dev_6.1.123-1_mips64el.deb"
+    version "6.1.123-1-ksr"
+    sha256 "055fd8c00048e28f49dfdd6ef8a1396eaab355cab0ac544fd760baa5bfad41a2"
   end
 
   resource "rpcsvc-proto" do
@@ -189,7 +182,7 @@ class KsysrootMips64elLinuxGnuabi64 < Formula
     ENV["PKG_CONFIG"]="#{Formula["pkgconf"].bin}/pkg-config"
     bom = <<~EOS
       # KSYSROOT_TRIPLE=mips64el-linux-gnuabi64 KSYSROOT_FULL_TRIPLE=mips64el-linux6.1-gnuabi64
-      # KSYSROOT_OSFLAVOUR=debian KSYSROOT_OSRELEASE=12
+      # KSYSROOT_OSFLAVOUR=Debian KSYSROOT_OSRELEASE=12
       # KSYSROOT_LINKER=ld.lld
       # KSYSROOT_LICENSE=GPL-2.0-or-later
       # MESON_SYSTEM=linux MESON_CPUFAMILY=mips64 MESON_CPU=mips64 MESON_ENDIAN=little
@@ -201,9 +194,14 @@ class KsysrootMips64elLinuxGnuabi64 < Formula
         "#{r.cached_download.relative_path_from(cachedir)} #{r.checksum}"
     }.join("\n")
     bom << "\n"
-    ohai "bom=#{bom}"
     File.write("bom.in", bom)
-    system "./ksysroot.sh", "frombom", prefix, "bom.in"
+    link_triple="mips64el-linux-gnuabi64"
+    system "./ksysroot.sh", "frombom", prefix, "bom.in", link_triple
+    rm prefix/"native.txt"
+    meson_cross = share/"meson/cross"
+    mkdir meson_cross
+    meson_cross.install prefix/"cross.txt" => "mips64el-linux6.1-gnuabi64"
+    meson_cross.install_symlink meson_cross/"mips64el-linux6.1-gnuabi64" => link_triple unless link_triple.empty?
   end
   test do
     resource "testcases" do
@@ -227,20 +225,16 @@ class KsysrootMips64elLinuxGnuabi64 < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # build a C library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
-      assert_predicate testpath/"build-c/main", :exist?
-
-      # build a C++ library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
-      assert_predicate testpath/"build-cxx/main", :exist?
+      # build a C and C++ library + program with meson
+      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
+             "--cross-file=mips64el-linux6.1-gnuabi64", testpath/"build"
+      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
+      # test for the executables
+      assert_predicate testpath/"build/test-c/main", :exist?
+      assert_predicate testpath/"build/test-cxx/main", :exist?
       # check pkg-config personality is properly set-up
-      assert_equal "-lcrypt", shell_output("#{bin}/mips64el-linux-gnuabi64-pkg-config --libs libcrypt").strip
-      assert_equal "", shell_output("#{bin}/mips64el-linux-gnuabi64-pkg-config --cflags libcrypt").strip
+      assert_equal "-lcrypt", shell_output("#{bin}/mips64el-linux6.1-gnuabi64-pkg-config --libs libcrypt").strip
+      assert_equal "", shell_output("#{bin}/mips64el-linux6.1-gnuabi64-pkg-config --cflags libcrypt").strip
     end
   end
 end
