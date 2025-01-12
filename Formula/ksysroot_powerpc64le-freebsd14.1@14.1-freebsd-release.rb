@@ -1,13 +1,13 @@
 class KsysrootPowerpc64leFreebsd141AT141FreebsdRelease < Formula
-  desc "Sysroot for powerpc64le-freebsd14.1@freebsd14.1-RELEASE"
+  desc "Sysroot for powerpc64le-freebsd14.1@FreeBSD14.1-RELEASE"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
-  sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
+  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
   license "BSD-2-Clause"
-  head "https://github.com/kevemueller/ksysroot.git", branch: "main"
+  head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
-  keg_only :versioned_formula
   depends_on "meson" => :test
+  depends_on "ksysroot_native"
   depends_on "lld"
   depends_on "llvm"
   depends_on "pkgconf"
@@ -32,20 +32,25 @@ class KsysrootPowerpc64leFreebsd141AT141FreebsdRelease < Formula
     ENV["PKG_CONFIG"]="#{Formula["pkgconf"].bin}/pkg-config"
     bom = <<~EOS
       # KSYSROOT_TRIPLE=powerpc64le-freebsd14.1 KSYSROOT_FULL_TRIPLE=powerpc64le-freebsd14.1
-      # KSYSROOT_OSFLAVOUR=freebsd KSYSROOT_OSRELEASE=14.1-RELEASE
+      # KSYSROOT_OSFLAVOUR=FreeBSD KSYSROOT_OSRELEASE=14.1-RELEASE
       # KSYSROOT_LINKER=ld.lld
       # KSYSROOT_LICENSE=BSD-2-Clause
       # MESON_SYSTEM=freebsd MESON_CPUFAMILY=ppc64 MESON_CPU=ppc64 MESON_ENDIAN=little
-      # FREEBSD_VERSION=14.1-RELEASE FREEBSD_MACHINE=powerpc FREEBSD_MACHINE_ARCH=powerpc64le
+      # FREEBSD_VERSION=14.1-RELEASE FREEBSD_KERNEL=14.1 FREEBSD_MACHINE=powerpc FREEBSD_MACHINE_ARCH=powerpc64le
     EOS
     bom << resources.map { |r|
       "#{r.name} #{r.version.to_s.delete_suffix("-ksr")} #{r.url} " \
         "#{r.cached_download.relative_path_from(cachedir)} #{r.checksum}"
     }.join("\n")
     bom << "\n"
-    ohai "bom=#{bom}"
     File.write("bom.in", bom)
-    system "./ksysroot.sh", "frombom", prefix, "bom.in"
+    link_triple=""
+    system "./ksysroot.sh", "frombom", prefix, "bom.in", link_triple
+    rm prefix/"native.txt"
+    meson_cross = share/"meson/cross"
+    mkdir meson_cross
+    meson_cross.install prefix/"cross.txt" => "powerpc64le-freebsd14.1"
+    meson_cross.install_symlink meson_cross/"powerpc64le-freebsd14.1" => link_triple unless link_triple.empty?
   end
   test do
     resource "testcases" do
@@ -69,17 +74,13 @@ class KsysrootPowerpc64leFreebsd141AT141FreebsdRelease < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # build a C library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
-      assert_predicate testpath/"build-c/main", :exist?
-
-      # build a C++ library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
-      assert_predicate testpath/"build-cxx/main", :exist?
+      # build a C and C++ library + program with meson
+      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
+             "--cross-file=powerpc64le-freebsd14.1", testpath/"build"
+      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
+      # test for the executables
+      assert_predicate testpath/"build/test-c/main", :exist?
+      assert_predicate testpath/"build/test-cxx/main", :exist?
       # check pkg-config personality is properly set-up
       assert_equal "-lcrypto", shell_output("#{bin}/powerpc64le-freebsd14.1-pkg-config --libs libcrypto").strip
       assert_equal "", shell_output("#{bin}/powerpc64le-freebsd14.1-pkg-config --cflags libcrypto").strip
