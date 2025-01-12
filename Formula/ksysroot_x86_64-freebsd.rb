@@ -1,17 +1,10 @@
 class KsysrootX8664Freebsd < Formula
-  desc "Sysroot for x86_64-freebsd14.2@freebsd14.2-RELEASE"
+  desc "Sysroot for x86_64-freebsd14.2@FreeBSD14.2-RELEASE"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.7.1.tar.gz"
-  sha256 "023d15752c0908cabd9630b5356ec7d49f5890a5b5411157c4114c3b866cec7c"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
+  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
   license "BSD-2-Clause"
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8b9de5c46335daa7bd594142937c98a7525be6106107d4fb74f494d55521abe5"
-    sha256 cellar: :any_skip_relocation, ventura:       "f019179b7ae1dedbd1be2d9c1bd952a3290e373483e41b35829e5bbcafc23d30"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e265c4c55b64ec909bf72c2b430dbc87c651b4dd053932d8c875fc4cceae9e5b"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
@@ -39,7 +32,7 @@ class KsysrootX8664Freebsd < Formula
     ENV["PKG_CONFIG"]="#{Formula["pkgconf"].bin}/pkg-config"
     bom = <<~EOS
       # KSYSROOT_TRIPLE=x86_64-freebsd14.2 KSYSROOT_FULL_TRIPLE=x86_64-freebsd14.2
-      # KSYSROOT_OSFLAVOUR=freebsd KSYSROOT_OSRELEASE=14.2-RELEASE
+      # KSYSROOT_OSFLAVOUR=FreeBSD KSYSROOT_OSRELEASE=14.2-RELEASE
       # KSYSROOT_LINKER=ld.lld
       # KSYSROOT_LICENSE=BSD-2-Clause
       # MESON_SYSTEM=freebsd MESON_CPUFAMILY=x86_64 MESON_CPU=x86_64 MESON_ENDIAN=little
@@ -50,7 +43,6 @@ class KsysrootX8664Freebsd < Formula
         "#{r.cached_download.relative_path_from(cachedir)} #{r.checksum}"
     }.join("\n")
     bom << "\n"
-    ohai "bom=#{bom}"
     File.write("bom.in", bom)
     link_triple="x86_64-freebsd"
     system "./ksysroot.sh", "frombom", prefix, "bom.in", link_triple
@@ -82,17 +74,13 @@ class KsysrootX8664Freebsd < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # build a C library + program with meson
+      # build a C and C++ library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
-             "--cross-file=x86_64-freebsd14.2", testpath/"build-c", "test-c"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
-      assert_predicate testpath/"build-c/main", :exist?
-
-      # build a C++ library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
-             "--cross-file=x86_64-freebsd14.2", testpath/"build-cxx", "test-cxx"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
-      assert_predicate testpath/"build-cxx/main", :exist?
+             "--cross-file=x86_64-freebsd14.2", testpath/"build"
+      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
+      # test for the executables
+      assert_predicate testpath/"build/test-c/main", :exist?
+      assert_predicate testpath/"build/test-cxx/main", :exist?
       # check pkg-config personality is properly set-up
       assert_equal "-lcrypto", shell_output("#{bin}/x86_64-freebsd14.2-pkg-config --libs libcrypto").strip
       assert_equal "", shell_output("#{bin}/x86_64-freebsd14.2-pkg-config --cflags libcrypto").strip
