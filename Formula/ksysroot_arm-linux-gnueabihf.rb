@@ -1,20 +1,13 @@
 class KsysrootArmLinuxGnueabihf < Formula
-  desc "Sysroot for arm-linux-gnueabihf@debian12"
+  desc "Sysroot for arm-linux-gnueabihf@Debian12"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
-  sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
+  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
   license "GPL-2.0-or-later"
-  revision 1
-  head "https://github.com/kevemueller/ksysroot.git", branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "410030b4c5ba60097a0db550d3feb832b94bd7c5b73d65348a2021e23edfe1dc"
-    sha256 cellar: :any_skip_relocation, ventura:       "896458b1a6f52b987f60336034eb3b50d9dcb5aa0b339a2ab09a0f7352b389c0"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9acbbd7b4f9fdffeca28c5c123a68dfb96feb2593960c24f4715acc45477933c"
-  end
+  head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
   depends_on "meson" => :test
+  depends_on "ksysroot_native"
   depends_on "lld"
   depends_on "llvm"
   depends_on "pkgconf"
@@ -182,9 +175,9 @@ class KsysrootArmLinuxGnueabihf < Formula
   end
 
   resource "linux-libc-dev" do
-    url "http://deb.debian.org/debian/pool/main/l/linux/linux-libc-dev_6.1.115-1_armhf.deb"
-    version "6.1.115-1-ksr"
-    sha256 "e4db044aaee1f60300f8b1aa2a443bc60e87c9cc32653db5c28cc53998ecb91e"
+    url "http://deb.debian.org/debian/pool/main/l/linux/linux-libc-dev_6.1.123-1_armhf.deb"
+    version "6.1.123-1-ksr"
+    sha256 "ede93aa7da6183e7fdfd7ad04151396d3d1aabd20fa15bbdf039edec0e9c2385"
   end
 
   resource "rpcsvc-proto" do
@@ -201,7 +194,7 @@ class KsysrootArmLinuxGnueabihf < Formula
     ENV["PKG_CONFIG"]="#{Formula["pkgconf"].bin}/pkg-config"
     bom = <<~EOS
       # KSYSROOT_TRIPLE=arm-linux-gnueabihf KSYSROOT_FULL_TRIPLE=arm-linux6.1-gnueabihf
-      # KSYSROOT_OSFLAVOUR=debian KSYSROOT_OSRELEASE=12
+      # KSYSROOT_OSFLAVOUR=Debian KSYSROOT_OSRELEASE=12
       # KSYSROOT_LINKER=ld.lld
       # KSYSROOT_LICENSE=GPL-2.0-or-later
       # MESON_SYSTEM=linux MESON_CPUFAMILY=arm MESON_CPU=arm MESON_ENDIAN=little
@@ -213,9 +206,14 @@ class KsysrootArmLinuxGnueabihf < Formula
         "#{r.cached_download.relative_path_from(cachedir)} #{r.checksum}"
     }.join("\n")
     bom << "\n"
-    ohai "bom=#{bom}"
     File.write("bom.in", bom)
-    system "./ksysroot.sh", "frombom", prefix, "bom.in"
+    link_triple="arm-linux-gnueabihf"
+    system "./ksysroot.sh", "frombom", prefix, "bom.in", link_triple
+    rm prefix/"native.txt"
+    meson_cross = share/"meson/cross"
+    mkdir meson_cross
+    meson_cross.install prefix/"cross.txt" => "arm-linux6.1-gnueabihf"
+    meson_cross.install_symlink meson_cross/"arm-linux6.1-gnueabihf" => link_triple unless link_triple.empty?
   end
   test do
     resource "testcases" do
@@ -239,20 +237,16 @@ class KsysrootArmLinuxGnueabihf < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # build a C library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
-      assert_predicate testpath/"build-c/main", :exist?
-
-      # build a C++ library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
-      assert_predicate testpath/"build-cxx/main", :exist?
+      # build a C and C++ library + program with meson
+      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
+             "--cross-file=arm-linux6.1-gnueabihf", testpath/"build"
+      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
+      # test for the executables
+      assert_predicate testpath/"build/test-c/main", :exist?
+      assert_predicate testpath/"build/test-cxx/main", :exist?
       # check pkg-config personality is properly set-up
-      assert_equal "-lcrypt", shell_output("#{bin}/arm-linux-gnueabihf-pkg-config --libs libcrypt").strip
-      assert_equal "", shell_output("#{bin}/arm-linux-gnueabihf-pkg-config --cflags libcrypt").strip
+      assert_equal "-lcrypt", shell_output("#{bin}/arm-linux6.1-gnueabihf-pkg-config --libs libcrypt").strip
+      assert_equal "", shell_output("#{bin}/arm-linux6.1-gnueabihf-pkg-config --cflags libcrypt").strip
     end
   end
 end
