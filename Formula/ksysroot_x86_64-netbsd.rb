@@ -7,6 +7,12 @@ class KsysrootX8664Netbsd < Formula
   revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
+  bottle do
+    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "f189efbbb11835d077432f2c7738a250d5683ef195d5fbf17c9032e39ceeaad6"
+    sha256 cellar: :any_skip_relocation, ventura:       "218c7ea0bac0920ea6d59a7f9be287a6afbad4cde551b8c30063c9a285c4ccfa"
+  end
+
   depends_on "meson" => :test
   depends_on "ksysroot_native"
   depends_on "lld"
