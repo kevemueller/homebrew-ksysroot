@@ -1,18 +1,10 @@
 class KsysrootNative < Formula
   desc "Sysroot for native@macos15.2"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.7.1.tar.gz"
-  sha256 "023d15752c0908cabd9630b5356ec7d49f5890a5b5411157c4114c3b866cec7c"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
+  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
   license "BSD-2-Clause"
-  revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "24d8e43dd22e2b453bc130a5581e447f46eff4a38adeae23dd4ca965aefcce06"
-    sha256 cellar: :any_skip_relocation, ventura:       "3ff59b69c960533cbc5ff8346d6381fe93bc8a3a61c1ae50a47ed10586e56d33"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "eb30c87213b694bf0e2d5d1326fc5d6e93acd9f85a717c0d16a90c6ef441dec3"
-  end
 
   depends_on "meson" => :test
   depends_on "lld"
@@ -56,17 +48,13 @@ class KsysrootNative < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # build a C library + program with meson
+      # build a C and C++ library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
-             testpath/"build-c", "test-c"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
-      assert_predicate testpath/"build-c/main", :exist?
-
-      # build a C++ library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
-             testpath/"build-cxx", "test-cxx"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
-      assert_predicate testpath/"build-cxx/main", :exist?
+             testpath/"build"
+      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
+      # test for the executables
+      assert_predicate testpath/"build/test-c/main", :exist?
+      assert_predicate testpath/"build/test-cxx/main", :exist?
       # check that pkg-config runs
       system bin/"native-pkg-config", "--list-all"
     end
