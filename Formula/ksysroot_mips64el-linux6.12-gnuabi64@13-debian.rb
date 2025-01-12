@@ -1,14 +1,13 @@
 class KsysrootMips64elLinux612Gnuabi64AT13Debian < Formula
-  desc "Sysroot for mips64el-linux-gnuabi64@debian13"
+  desc "Sysroot for mips64el-linux-gnuabi64@Debian13"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
-  sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
+  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
   license "GPL-2.0-or-later"
-  revision 1
-  head "https://github.com/kevemueller/ksysroot.git", branch: "main"
+  head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
-  keg_only :versioned_formula
   depends_on "meson" => :test
+  depends_on "ksysroot_native"
   depends_on "lld"
   depends_on "llvm"
   depends_on "pkgconf"
@@ -20,33 +19,33 @@ class KsysrootMips64elLinux612Gnuabi64AT13Debian < Formula
   end
 
   resource "gcc-14-base" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/gcc-14-base_14.2.0-8_mips64el.deb"
-    version "14.2.0-8-ksr"
-    sha256 "c7d3024dcace09707514e2d5620e4731a2d83f0fd6545789952590b92564c218"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/gcc-14-base_14.2.0-12_mips64el.deb"
+    version "14.2.0-12-ksr"
+    sha256 "e168ab72d24d29dddce668fcf6c9ebaf2f4062a8e83449fccc8a66640b2b5acb"
   end
 
   resource "libatomic1" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libatomic1_14.2.0-8_mips64el.deb"
-    version "14.2.0-8-ksr"
-    sha256 "fa7b39b6542fcbd036bb3acc0ddfcf3824325fd8970458e141c6d93bd34a5977"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libatomic1_14.2.0-12_mips64el.deb"
+    version "14.2.0-12-ksr"
+    sha256 "ba70167f296c855f5f95a06e891b6c3a91af670998f72c6996e5962242591337"
   end
 
   resource "libc-dev-bin" do
-    url "http://deb.debian.org/debian/pool/main/g/glibc/libc-dev-bin_2.40-4_mips64el.deb"
-    version "2.40-4-ksr"
-    sha256 "3272ccd197257995b2226c338476680e444b1cd6bb8c7b993fd65e995770f182"
+    url "http://deb.debian.org/debian/pool/main/g/glibc/libc-dev-bin_2.40-5_mips64el.deb"
+    version "2.40-5-ksr"
+    sha256 "30b4d5bf160e4dfcceeee1fb601b570f14873badcae1f38c6a50791c1e12e380"
   end
 
   resource "libc6" do
-    url "http://deb.debian.org/debian/pool/main/g/glibc/libc6_2.40-4_mips64el.deb"
-    version "2.40-4-ksr"
-    sha256 "0a134a1bb7fc5cc5bf72ed07ccc96dfa6cc4cb4bdd285f50a78e4e1488b54761"
+    url "http://deb.debian.org/debian/pool/main/g/glibc/libc6_2.40-5_mips64el.deb"
+    version "2.40-5-ksr"
+    sha256 "87477d9a8a5cc09d425300d0fe7de3f37e8c48c0353fd488263a5fc79e76f1c2"
   end
 
   resource "libc6-dev" do
-    url "http://deb.debian.org/debian/pool/main/g/glibc/libc6-dev_2.40-4_mips64el.deb"
-    version "2.40-4-ksr"
-    sha256 "432e6ca1325f5b5010cd1065d761bf8829edbc9ee5153db58f774d877b4272ec"
+    url "http://deb.debian.org/debian/pool/main/g/glibc/libc6-dev_2.40-5_mips64el.deb"
+    version "2.40-5-ksr"
+    sha256 "08b1e31685e2ce3ad71ac272f95b2c6ba67ca249dbdec07014ac8f50cdd2e44a"
   end
 
   resource "libcrypt-dev" do
@@ -62,33 +61,33 @@ class KsysrootMips64elLinux612Gnuabi64AT13Debian < Formula
   end
 
   resource "libgcc-14-dev" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libgcc-14-dev_14.2.0-8_mips64el.deb"
-    version "14.2.0-8-ksr"
-    sha256 "ea6d2db7b886f04e3607cb56ccb34f6d1cdfee3dc9f7b6690e5363230a7381ff"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libgcc-14-dev_14.2.0-12_mips64el.deb"
+    version "14.2.0-12-ksr"
+    sha256 "23ad2286c1b00cec9654d0cc58cf06af16c0bd4f98e3df8b7cc7d340441b72fe"
   end
 
   resource "libgcc-s1" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libgcc-s1_14.2.0-8_mips64el.deb"
-    version "14.2.0-8-ksr"
-    sha256 "c475e2fb77f86e8da427f45f7bc497b1b0fbfe6a185d57642d26eec6e88e3d8a"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libgcc-s1_14.2.0-12_mips64el.deb"
+    version "14.2.0-12-ksr"
+    sha256 "3f4d66731e43113c0e3eb56ba61d6f356c60028d103d96325c2ba488de90788d"
   end
 
   resource "libgomp1" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libgomp1_14.2.0-8_mips64el.deb"
-    version "14.2.0-8-ksr"
-    sha256 "bb6d5129d2473447c06e20d1b2fdbfbd62a78ee12a04ac83045fd4d3fdd690a9"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libgomp1_14.2.0-12_mips64el.deb"
+    version "14.2.0-12-ksr"
+    sha256 "6bc353122f7ff622955998fe12f27f46cf2fd5aedfc58b37f2d73228db7f5a5d"
   end
 
   resource "libstdc++-14-dev" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libstdc++-14-dev_14.2.0-8_mips64el.deb"
-    version "14.2.0-8-ksr"
-    sha256 "bb1468fd6acdef49ebdb143f4025fbc6bbd214f86e9801544d3b04eb04e5bef7"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libstdc++-14-dev_14.2.0-12_mips64el.deb"
+    version "14.2.0-12-ksr"
+    sha256 "97c9f3912a4c73b558cfab903b1b592676cea6e7a49943a5b09218b3e3a01049"
   end
 
   resource "libstdc++6" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libstdc++6_14.2.0-8_mips64el.deb"
-    version "14.2.0-8-ksr"
-    sha256 "178c7ff79147aec9021a0e1fd642b9610a20ec882d385cd92e75f8bd5adb935f"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libstdc++6_14.2.0-12_mips64el.deb"
+    version "14.2.0-12-ksr"
+    sha256 "f7f4575b4ddfc811ae8f912e1f9a35292b4c38425ca23242658def8df586259c"
   end
 
   resource "linux-libc-dev" do
@@ -111,7 +110,7 @@ class KsysrootMips64elLinux612Gnuabi64AT13Debian < Formula
     ENV["PKG_CONFIG"]="#{Formula["pkgconf"].bin}/pkg-config"
     bom = <<~EOS
       # KSYSROOT_TRIPLE=mips64el-linux-gnuabi64 KSYSROOT_FULL_TRIPLE=mips64el-linux6.12-gnuabi64
-      # KSYSROOT_OSFLAVOUR=debian KSYSROOT_OSRELEASE=13
+      # KSYSROOT_OSFLAVOUR=Debian KSYSROOT_OSRELEASE=13
       # KSYSROOT_LINKER=ld.lld
       # KSYSROOT_LICENSE=GPL-2.0-or-later
       # MESON_SYSTEM=linux MESON_CPUFAMILY=mips64 MESON_CPU=mips64 MESON_ENDIAN=little
@@ -123,9 +122,14 @@ class KsysrootMips64elLinux612Gnuabi64AT13Debian < Formula
         "#{r.cached_download.relative_path_from(cachedir)} #{r.checksum}"
     }.join("\n")
     bom << "\n"
-    ohai "bom=#{bom}"
     File.write("bom.in", bom)
-    system "./ksysroot.sh", "frombom", prefix, "bom.in"
+    link_triple=""
+    system "./ksysroot.sh", "frombom", prefix, "bom.in", link_triple
+    rm prefix/"native.txt"
+    meson_cross = share/"meson/cross"
+    mkdir meson_cross
+    meson_cross.install prefix/"cross.txt" => "mips64el-linux6.12-gnuabi64"
+    meson_cross.install_symlink meson_cross/"mips64el-linux6.12-gnuabi64" => link_triple unless link_triple.empty?
   end
   test do
     resource "testcases" do
@@ -149,20 +153,16 @@ class KsysrootMips64elLinux612Gnuabi64AT13Debian < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # build a C library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
-      assert_predicate testpath/"build-c/main", :exist?
-
-      # build a C++ library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
-      assert_predicate testpath/"build-cxx/main", :exist?
+      # build a C and C++ library + program with meson
+      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
+             "--cross-file=mips64el-linux6.12-gnuabi64", testpath/"build"
+      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
+      # test for the executables
+      assert_predicate testpath/"build/test-c/main", :exist?
+      assert_predicate testpath/"build/test-cxx/main", :exist?
       # check pkg-config personality is properly set-up
-      assert_equal "-lcrypt", shell_output("#{bin}/mips64el-linux-gnuabi64-pkg-config --libs libcrypt").strip
-      assert_equal "", shell_output("#{bin}/mips64el-linux-gnuabi64-pkg-config --cflags libcrypt").strip
+      assert_equal "-lcrypt", shell_output("#{bin}/mips64el-linux6.12-gnuabi64-pkg-config --libs libcrypt").strip
+      assert_equal "", shell_output("#{bin}/mips64el-linux6.12-gnuabi64-pkg-config --cflags libcrypt").strip
     end
   end
 end
