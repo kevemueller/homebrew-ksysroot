@@ -1,14 +1,13 @@
 class KsysrootI386Linux612GnuAT13Debian < Formula
-  desc "Sysroot for i386-linux-gnu@debian13"
+  desc "Sysroot for i386-linux-gnu@Debian13"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
-  sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
+  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
   license "GPL-2.0-or-later"
-  revision 1
-  head "https://github.com/kevemueller/ksysroot.git", branch: "main"
+  head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
-  keg_only :versioned_formula
   depends_on "meson" => :test
+  depends_on "ksysroot_native"
   depends_on "lld"
   depends_on "llvm"
   depends_on "pkgconf"
@@ -20,39 +19,39 @@ class KsysrootI386Linux612GnuAT13Debian < Formula
   end
 
   resource "gcc-14-base" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/gcc-14-base_14.2.0-8_i386.deb"
-    version "14.2.0-8-ksr"
-    sha256 "10902651316212f05dd912668c054dd838b3bba949edfc1903fa26a077081f0a"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/gcc-14-base_14.2.0-12_i386.deb"
+    version "14.2.0-12-ksr"
+    sha256 "fc006225d860a191afc0c16bcc8cf48724267189b11a2779a4aeb0b6e26ef999"
   end
 
   resource "libasan8" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libasan8_14.2.0-8_i386.deb"
-    version "14.2.0-8-ksr"
-    sha256 "b74f983748c60e4c6fc89991d74a610d081244d2858f8af4d91c8a3b706ea786"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libasan8_14.2.0-12_i386.deb"
+    version "14.2.0-12-ksr"
+    sha256 "5eb91cc251fe298d0eb33404da8c91c917d92d3accb660a959856fc6e4325835"
   end
 
   resource "libatomic1" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libatomic1_14.2.0-8_i386.deb"
-    version "14.2.0-8-ksr"
-    sha256 "41994186ba593f50f2a1908e30e3dee30b70a821a50ef61a3fb1685ccfcb6407"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libatomic1_14.2.0-12_i386.deb"
+    version "14.2.0-12-ksr"
+    sha256 "21b187f4c75237865f03baaa7473b9a71071deeebd6b739814b3ec472126d53c"
   end
 
   resource "libc-dev-bin" do
-    url "http://deb.debian.org/debian/pool/main/g/glibc/libc-dev-bin_2.40-4_i386.deb"
-    version "2.40-4-ksr"
-    sha256 "0c336e873dc95c43e0c9ab93c128f6ee63630f2972dbbae4544f5a242c25d08e"
+    url "http://deb.debian.org/debian/pool/main/g/glibc/libc-dev-bin_2.40-5_i386.deb"
+    version "2.40-5-ksr"
+    sha256 "766d5ce1fe122d127f7c2369cdc6e914a8e7c4d0173cf88897c687a4e475f76b"
   end
 
   resource "libc6" do
-    url "http://deb.debian.org/debian/pool/main/g/glibc/libc6_2.40-4_i386.deb"
-    version "2.40-4-ksr"
-    sha256 "942094e81d016e716a75b141ec92d4042357b1e777f987bb2367969cc994fda4"
+    url "http://deb.debian.org/debian/pool/main/g/glibc/libc6_2.40-5_i386.deb"
+    version "2.40-5-ksr"
+    sha256 "9d55ee12c2f7059769915caba3617dc688a7e716941c2bdad33dc2490baf5502"
   end
 
   resource "libc6-dev" do
-    url "http://deb.debian.org/debian/pool/main/g/glibc/libc6-dev_2.40-4_i386.deb"
-    version "2.40-4-ksr"
-    sha256 "cffe8d4503110ed744626b4539ca9e756749de491906c88f214cc5a094dc704a"
+    url "http://deb.debian.org/debian/pool/main/g/glibc/libc6-dev_2.40-5_i386.deb"
+    version "2.40-5-ksr"
+    sha256 "5a818db56bf5433d1b8d0ef44eed57f0b5b0d8412b3a519266b420d7ae43f01e"
   end
 
   resource "libcrypt-dev" do
@@ -68,51 +67,51 @@ class KsysrootI386Linux612GnuAT13Debian < Formula
   end
 
   resource "libgcc-14-dev" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libgcc-14-dev_14.2.0-8_i386.deb"
-    version "14.2.0-8-ksr"
-    sha256 "91ddbe5f1e6dc3863a9dc178f2ca4d2bc37c1f8aac3756d468949928f57db7a0"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libgcc-14-dev_14.2.0-12_i386.deb"
+    version "14.2.0-12-ksr"
+    sha256 "8c5e8749272a7edcd3e9dbf935d283265a15654ddd8cee0d1d1e7ceb32411e9f"
   end
 
   resource "libgcc-s1" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libgcc-s1_14.2.0-8_i386.deb"
-    version "14.2.0-8-ksr"
-    sha256 "968e1c78858f55386d6b674cc61922d827437b5e249ee38862034ace629d451a"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libgcc-s1_14.2.0-12_i386.deb"
+    version "14.2.0-12-ksr"
+    sha256 "debf9e757cc34d15082180b7dedd345b894530e4d2aad0a5d1d825396a5f6f34"
   end
 
   resource "libgomp1" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libgomp1_14.2.0-8_i386.deb"
-    version "14.2.0-8-ksr"
-    sha256 "8ada5e03001327c6f2b41110c4f5c050f8b7273f9b6b301acf783e125f3867f4"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libgomp1_14.2.0-12_i386.deb"
+    version "14.2.0-12-ksr"
+    sha256 "f45bc96a1171216f830bada5f3ad21c5975797cb4a301807a4834345147a328d"
   end
 
   resource "libitm1" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libitm1_14.2.0-8_i386.deb"
-    version "14.2.0-8-ksr"
-    sha256 "f6bca50c5c3007ff43e71eb53f6761ef2695f69833f5abd784fa3941820e85fc"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libitm1_14.2.0-12_i386.deb"
+    version "14.2.0-12-ksr"
+    sha256 "b1c495386d39b9893d2e6cee9ed1d99c5fed5840a9ebe018ee06de4b60bad167"
   end
 
   resource "libquadmath0" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libquadmath0_14.2.0-8_i386.deb"
-    version "14.2.0-8-ksr"
-    sha256 "01a0cf9afd8cbda12de02f8cbbd4652384747bd80b31a8898bf9f9a3f382a75f"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libquadmath0_14.2.0-12_i386.deb"
+    version "14.2.0-12-ksr"
+    sha256 "6c47eba82807d13b8b29f2dffad27bf29929d87c24764800fb2938e5214634e0"
   end
 
   resource "libstdc++-14-dev" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libstdc++-14-dev_14.2.0-8_i386.deb"
-    version "14.2.0-8-ksr"
-    sha256 "fc89719fe619d7121d3041b1ba1e790f805c0b2d884173e2677c69089d0cf5f2"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libstdc++-14-dev_14.2.0-12_i386.deb"
+    version "14.2.0-12-ksr"
+    sha256 "0a017a3cd30dd1a262102f63dfd02346cf57574b6ef98a4086e3474c6a917faf"
   end
 
   resource "libstdc++6" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libstdc++6_14.2.0-8_i386.deb"
-    version "14.2.0-8-ksr"
-    sha256 "bf3fc87428782c63abccf82b8a9724b6a1cad48f4994bf7fb911f554c12a3923"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libstdc++6_14.2.0-12_i386.deb"
+    version "14.2.0-12-ksr"
+    sha256 "3deda120d56800d5280277a7b1bff2e9df13f19687519644bebb56f72406a65d"
   end
 
   resource "libubsan1" do
-    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libubsan1_14.2.0-8_i386.deb"
-    version "14.2.0-8-ksr"
-    sha256 "96f98dfc99cf2bbb196ff4d5a07188930e071f7ea6b11f653c40eb4e11b0dc50"
+    url "http://deb.debian.org/debian/pool/main/g/gcc-14/libubsan1_14.2.0-12_i386.deb"
+    version "14.2.0-12-ksr"
+    sha256 "d4e474e9816ee8aadaec2f02722d9c5b5cfd9c433f269cdf06bebc10a9c39338"
   end
 
   resource "linux-libc-dev" do
@@ -135,7 +134,7 @@ class KsysrootI386Linux612GnuAT13Debian < Formula
     ENV["PKG_CONFIG"]="#{Formula["pkgconf"].bin}/pkg-config"
     bom = <<~EOS
       # KSYSROOT_TRIPLE=i386-linux-gnu KSYSROOT_FULL_TRIPLE=i386-linux6.12-gnu
-      # KSYSROOT_OSFLAVOUR=debian KSYSROOT_OSRELEASE=13
+      # KSYSROOT_OSFLAVOUR=Debian KSYSROOT_OSRELEASE=13
       # KSYSROOT_LINKER=ld.lld
       # KSYSROOT_LICENSE=GPL-2.0-or-later
       # MESON_SYSTEM=linux MESON_CPUFAMILY=x86 MESON_CPU=x86 MESON_ENDIAN=little
@@ -147,9 +146,14 @@ class KsysrootI386Linux612GnuAT13Debian < Formula
         "#{r.cached_download.relative_path_from(cachedir)} #{r.checksum}"
     }.join("\n")
     bom << "\n"
-    ohai "bom=#{bom}"
     File.write("bom.in", bom)
-    system "./ksysroot.sh", "frombom", prefix, "bom.in"
+    link_triple=""
+    system "./ksysroot.sh", "frombom", prefix, "bom.in", link_triple
+    rm prefix/"native.txt"
+    meson_cross = share/"meson/cross"
+    mkdir meson_cross
+    meson_cross.install prefix/"cross.txt" => "i386-linux6.12-gnu"
+    meson_cross.install_symlink meson_cross/"i386-linux6.12-gnu" => link_triple unless link_triple.empty?
   end
   test do
     resource "testcases" do
@@ -173,20 +177,16 @@ class KsysrootI386Linux612GnuAT13Debian < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # build a C library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
-      assert_predicate testpath/"build-c/main", :exist?
-
-      # build a C++ library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
-      assert_predicate testpath/"build-cxx/main", :exist?
+      # build a C and C++ library + program with meson
+      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
+             "--cross-file=i386-linux6.12-gnu", testpath/"build"
+      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
+      # test for the executables
+      assert_predicate testpath/"build/test-c/main", :exist?
+      assert_predicate testpath/"build/test-cxx/main", :exist?
       # check pkg-config personality is properly set-up
-      assert_equal "-lcrypt", shell_output("#{bin}/i386-linux-gnu-pkg-config --libs libcrypt").strip
-      assert_equal "", shell_output("#{bin}/i386-linux-gnu-pkg-config --cflags libcrypt").strip
+      assert_equal "-lcrypt", shell_output("#{bin}/i386-linux6.12-gnu-pkg-config --libs libcrypt").strip
+      assert_equal "", shell_output("#{bin}/i386-linux6.12-gnu-pkg-config --cflags libcrypt").strip
     end
   end
 end
