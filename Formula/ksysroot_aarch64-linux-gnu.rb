@@ -1,18 +1,10 @@
 class KsysrootAarch64LinuxGnu < Formula
-  desc "Sysroot for aarch64-linux-gnu@debian12"
+  desc "Sysroot for aarch64-linux-gnu@Debian12"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.7.1.tar.gz"
-  sha256 "023d15752c0908cabd9630b5356ec7d49f5890a5b5411157c4114c3b866cec7c"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
+  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
   license "GPL-2.0-or-later"
-  revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "d861a9caa48273b5b3b4d0e729f7d06070a0cb33728fdf8edbe28775c83f1591"
-    sha256 cellar: :any_skip_relocation, ventura:       "4bd14b868117e576fe46a1ef814eec037bbbf63bf1bf956672c1effcdf068b5d"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "4dfefb90792743c8b65e8114b334b1135372e793f2b843df6fb68c746f1a6eb0"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
@@ -207,9 +199,9 @@ class KsysrootAarch64LinuxGnu < Formula
   end
 
   resource "linux-libc-dev" do
-    url "http://deb.debian.org/debian/pool/main/l/linux/linux-libc-dev_6.1.115-1_arm64.deb"
-    version "6.1.115-1-ksr"
-    sha256 "a402a5f2fa621468496f0e20edc82ab8653ddb8caa877abfbbfa8dc820950c28"
+    url "http://deb.debian.org/debian/pool/main/l/linux/linux-libc-dev_6.1.123-1_arm64.deb"
+    version "6.1.123-1-ksr"
+    sha256 "954507a3cd6a4411ac24dc26d68b3c6403329841e1ea2f9a937e2d0d6a92ac42"
   end
 
   resource "rpcsvc-proto" do
@@ -226,7 +218,7 @@ class KsysrootAarch64LinuxGnu < Formula
     ENV["PKG_CONFIG"]="#{Formula["pkgconf"].bin}/pkg-config"
     bom = <<~EOS
       # KSYSROOT_TRIPLE=aarch64-linux-gnu KSYSROOT_FULL_TRIPLE=aarch64-linux6.1-gnu
-      # KSYSROOT_OSFLAVOUR=debian KSYSROOT_OSRELEASE=12
+      # KSYSROOT_OSFLAVOUR=Debian KSYSROOT_OSRELEASE=12
       # KSYSROOT_LINKER=ld.lld
       # KSYSROOT_LICENSE=GPL-2.0-or-later
       # MESON_SYSTEM=linux MESON_CPUFAMILY=aarch64 MESON_CPU=aarch64 MESON_ENDIAN=little
@@ -238,7 +230,6 @@ class KsysrootAarch64LinuxGnu < Formula
         "#{r.cached_download.relative_path_from(cachedir)} #{r.checksum}"
     }.join("\n")
     bom << "\n"
-    ohai "bom=#{bom}"
     File.write("bom.in", bom)
     link_triple="aarch64-linux-gnu"
     system "./ksysroot.sh", "frombom", prefix, "bom.in", link_triple
@@ -270,17 +261,13 @@ class KsysrootAarch64LinuxGnu < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # build a C library + program with meson
+      # build a C and C++ library + program with meson
       system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
-             "--cross-file=aarch64-linux6.1-gnu", testpath/"build-c", "test-c"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
-      assert_predicate testpath/"build-c/main", :exist?
-
-      # build a C++ library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
-             "--cross-file=aarch64-linux6.1-gnu", testpath/"build-cxx", "test-cxx"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
-      assert_predicate testpath/"build-cxx/main", :exist?
+             "--cross-file=aarch64-linux6.1-gnu", testpath/"build"
+      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
+      # test for the executables
+      assert_predicate testpath/"build/test-c/main", :exist?
+      assert_predicate testpath/"build/test-cxx/main", :exist?
       # check pkg-config personality is properly set-up
       assert_equal "-lcrypt", shell_output("#{bin}/aarch64-linux6.1-gnu-pkg-config --libs libcrypt").strip
       assert_equal "", shell_output("#{bin}/aarch64-linux6.1-gnu-pkg-config --cflags libcrypt").strip
