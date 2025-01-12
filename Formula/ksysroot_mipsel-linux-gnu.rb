@@ -1,20 +1,13 @@
 class KsysrootMipselLinuxGnu < Formula
-  desc "Sysroot for mipsel-linux-gnu@debian12"
+  desc "Sysroot for mipsel-linux-gnu@Debian12"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.6.4.tar.gz"
-  sha256 "b8d0954e9d71aa5b10f2d41b4279287cb235d7dbcfc0bc431ffaa98034c4d884"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
+  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
   license "GPL-2.0-or-later"
-  revision 1
-  head "https://github.com/kevemueller/ksysroot.git", branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "c7b0985fe39cf1fd0595a922a7dff4ee3d9d25d60ec9bbc3db4fd90063877178"
-    sha256 cellar: :any_skip_relocation, ventura:       "ebda0381d3807b80cccf22cfd18d2df228e5bf11e548e6d6017401abd1819886"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "7606dfeeeb56b2d922232cff9b8c66e99010c43ae374a2a5f7714b4f4f9603d9"
-  end
+  head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
   depends_on "meson" => :test
+  depends_on "ksysroot_native"
   depends_on "lld"
   depends_on "llvm"
   depends_on "pkgconf"
@@ -170,9 +163,9 @@ class KsysrootMipselLinuxGnu < Formula
   end
 
   resource "linux-libc-dev" do
-    url "http://deb.debian.org/debian/pool/main/l/linux/linux-libc-dev_6.1.115-1_mipsel.deb"
-    version "6.1.115-1-ksr"
-    sha256 "9ebdf577d49ce3eb7edbc76c6e5e025a683f2900661fd840ebe0d9b32b5b982f"
+    url "http://deb.debian.org/debian/pool/main/l/linux/linux-libc-dev_6.1.123-1_mipsel.deb"
+    version "6.1.123-1-ksr"
+    sha256 "c089cd234ca80f98d4bff2dcf58fc82bcb93a91bb28479cb3c8deba084b2039d"
   end
 
   resource "rpcsvc-proto" do
@@ -189,7 +182,7 @@ class KsysrootMipselLinuxGnu < Formula
     ENV["PKG_CONFIG"]="#{Formula["pkgconf"].bin}/pkg-config"
     bom = <<~EOS
       # KSYSROOT_TRIPLE=mipsel-linux-gnu KSYSROOT_FULL_TRIPLE=mipsel-linux6.1-gnu
-      # KSYSROOT_OSFLAVOUR=debian KSYSROOT_OSRELEASE=12
+      # KSYSROOT_OSFLAVOUR=Debian KSYSROOT_OSRELEASE=12
       # KSYSROOT_LINKER=ld.lld
       # KSYSROOT_LICENSE=GPL-2.0-or-later
       # MESON_SYSTEM=linux MESON_CPUFAMILY=mips MESON_CPU=mips MESON_ENDIAN=little
@@ -201,9 +194,14 @@ class KsysrootMipselLinuxGnu < Formula
         "#{r.cached_download.relative_path_from(cachedir)} #{r.checksum}"
     }.join("\n")
     bom << "\n"
-    ohai "bom=#{bom}"
     File.write("bom.in", bom)
-    system "./ksysroot.sh", "frombom", prefix, "bom.in"
+    link_triple="mipsel-linux-gnu"
+    system "./ksysroot.sh", "frombom", prefix, "bom.in", link_triple
+    rm prefix/"native.txt"
+    meson_cross = share/"meson/cross"
+    mkdir meson_cross
+    meson_cross.install prefix/"cross.txt" => "mipsel-linux6.1-gnu"
+    meson_cross.install_symlink meson_cross/"mipsel-linux6.1-gnu" => link_triple unless link_triple.empty?
   end
   test do
     resource "testcases" do
@@ -227,20 +225,16 @@ class KsysrootMipselLinuxGnu < Formula
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # build a C library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-c", "test-c"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
-      assert_predicate testpath/"build-c/main", :exist?
-
-      # build a C++ library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             "--cross-file=#{prefix}/cross.txt", testpath/"build-cxx", "test-cxx"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
-      assert_predicate testpath/"build-cxx/main", :exist?
+      # build a C and C++ library + program with meson
+      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
+             "--cross-file=mipsel-linux6.1-gnu", testpath/"build"
+      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
+      # test for the executables
+      assert_predicate testpath/"build/test-c/main", :exist?
+      assert_predicate testpath/"build/test-cxx/main", :exist?
       # check pkg-config personality is properly set-up
-      assert_equal "-lcrypt", shell_output("#{bin}/mipsel-linux-gnu-pkg-config --libs libcrypt").strip
-      assert_equal "", shell_output("#{bin}/mipsel-linux-gnu-pkg-config --cflags libcrypt").strip
+      assert_equal "-lcrypt", shell_output("#{bin}/mipsel-linux6.1-gnu-pkg-config --libs libcrypt").strip
+      assert_equal "", shell_output("#{bin}/mipsel-linux6.1-gnu-pkg-config --cflags libcrypt").strip
     end
   end
 end
