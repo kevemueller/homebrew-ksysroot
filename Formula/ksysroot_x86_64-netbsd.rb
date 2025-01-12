@@ -4,6 +4,7 @@ class KsysrootX8664Netbsd < Formula
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
   sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
   license "BSD-4-Clause-UC"
+  revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
   depends_on "meson" => :test
@@ -60,5 +61,36 @@ class KsysrootX8664Netbsd < Formula
     mkdir meson_cross
     meson_cross.install prefix/"cross.txt" => "x86_64-netbsd10.1"
     meson_cross.install_symlink meson_cross/"x86_64-netbsd10.1" => link_triple unless link_triple.empty?
+  end
+  test do
+    resource "testcases" do
+      url KsysrootX8664Netbsd.stable.url
+      sha256 KsysrootX8664Netbsd.stable.checksum.hexdigest
+    end
+    resource("testcases").stage do
+      ENV.delete("CC")
+      ENV.delete("CXX")
+      ENV.delete("CXX")
+      ENV.delete("OBJC")
+      ENV.delete("OBJCXX")
+      ENV.delete("CFLAGS")
+      ENV.delete("CPPFLAGS")
+      ENV.delete("CXXFLAGS")
+      ENV.delete("LDFLAGS")
+      ENV.delete("LD_RUN_PATH")
+      ENV.delete("LIBRARY_PATH")
+      ENV.delete("OBJCFLAGS")
+      ENV.delete("OBJCXXFLAGS")
+      ENV.delete("CPATH")
+      ENV.delete("PKG_CONFIG_LIBDIR")
+      system "set"
+      # build a C and C++ library + program with meson
+      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
+             "--cross-file=x86_64-netbsd10.1", testpath/"build"
+      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
+      # test for the executables
+      assert_predicate testpath/"build/test-c/main", :exist?
+      assert_predicate testpath/"build/test-cxx/main", :exist?
+    end
   end
 end
