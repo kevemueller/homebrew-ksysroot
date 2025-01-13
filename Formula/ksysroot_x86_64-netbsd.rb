@@ -1,17 +1,10 @@
 class KsysrootX8664Netbsd < Formula
   desc "Sysroot for x86_64-netbsd10.1@NetBSD10.1"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
-  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
+  sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "BSD-4-Clause-UC"
-  revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "f189efbbb11835d077432f2c7738a250d5683ef195d5fbf17c9032e39ceeaad6"
-    sha256 cellar: :any_skip_relocation, ventura:       "218c7ea0bac0920ea6d59a7f9be287a6afbad4cde551b8c30063c9a285c4ccfa"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
