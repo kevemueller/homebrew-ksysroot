@@ -1,17 +1,10 @@
 class KsysrootPowerpcFreebsd < Formula
   desc "Sysroot for powerpc-freebsd14.2@FreeBSD14.2-RELEASE"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
-  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
+  sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "BSD-2-Clause"
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "05fcdf2791513dfaaf6df676268f2b094ce5438067f019c78acea686b46ac774"
-    sha256 cellar: :any_skip_relocation, ventura:       "febf0604694766e892f6bafe8f121c0302130916c82f0558c35f1c8e90be8c41"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "65cda998298597d541b39b6f3b300b3eb5d2583d1932039702da83c482a16b72"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
