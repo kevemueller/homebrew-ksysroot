@@ -57,7 +57,9 @@ list_exceptions() {
 fetch_ksysroot() {
   local ksysroot_version
   ksysroot_version="$(curl --silent https://api.github.com/repos/kevemueller/ksysroot/releases/latest | jq -r .tag_name)"
+  # ksysroot_version=v0.8
   KSYSROOT_URL=https://github.com/kevemueller/ksysroot/archive/refs/tags/"${ksysroot_version}".tar.gz
+  : "${KSYSROOT_GIT:="https://github.com/kevemueller/ksysroot.git"}"
 
   ${CURL} --silent --fail -L -o "${CACHE_DIR}"/ksysroot.tar.gz "${KSYSROOT_URL}"
   KSYSROOT_SHA=$(${SHA256SUM} "${CACHE_DIR}"/ksysroot.tar.gz | cut -d" " -f 1)
@@ -74,58 +76,107 @@ emit_package() {
   local bomfile="$1"
   local tgt_dir="${2:-.}"
   local package_file
-  local versioned="yes"
+  local link_triple=
+  local depnative=
 
   1>&2 cat "${bomfile}"
   1>&2 echo
   1>&2 echo
 
-  KSYSROOT_OSRELEASE=
-  KSYSROOT_OSFLAVOUR=
-  KSYSROOT_FULL_TRIPLE=
-  KSYSROOT_TRIPLE=
-  MESON_SYSTEM=
-  MESON_CPUFAMILY=
+  local KSYSROOT_OSRELEASE
+  local KSYSROOT_OSFLAVOUR
+  local KSYSROOT_FULL_TRIPLE
+  local KSYSROOT_TRIPLE
+  local KSYSROOT_LICENSE
+  local MESON_CPUFAMILY
 
   # shellcheck disable=SC2046
   export $(sed -nE 's/^#(.*)$/\1/p' "${bomfile}" | xargs)
+
+  if [ "${KSYSROOT_OSRELEASE}" = "edge" ]
+  then
+    KSYSROOT_OSRELEASE="99edge"
+  fi
 
   flavour_number="${KSYSROOT_OSRELEASE%-*}"
   flavour_text="$(echo "${KSYSROOT_OSRELEASE#"${flavour_number}"}" | tr '[:upper:]' '[:lower:]')"
   flavour_os="$(echo "${KSYSROOT_OSFLAVOUR}" | tr '[:upper:]' '[:lower:]')"
   package="ksysroot_${KSYSROOT_FULL_TRIPLE}@${flavour_number}-${flavour_os}${flavour_text}"
 
+  local disable=
+
   if [ "${KSYSROOT_TRIPLE}" = "native" ]
   then
     cross_file=
+    uses_from_macos=
+    depnative=
     package="ksysroot_native"
-    versioned="no"
   else
-    cross_file='"--cross-file=#{prefix}/cross.txt", '
-    case "${MESON_SYSTEM}" in
-      freebsd)
-        if [ "${KSYSROOT_OSFLAVOUR}" = "freebsd" ] && [ "${KSYSROOT_OSRELEASE}" = "14.2-RELEASE" ]
+    cross_file="\"--cross-file=${KSYSROOT_FULL_TRIPLE}\", "
+    uses_from_macos="  uses_from_macos \"libarchive\"
+"
+    depnative="  depends_on \"ksysroot_native\"
+"
+    case "${KSYSROOT_OSFLAVOUR}" in
+      Alpine)
+        if [ "${KSYSROOT_OSRELEASE}" = "v3.21" ]
         then
           lpackage="${package}"
-          package="${package%14.2@*}"
+          package="ksysroot_${KSYSROOT_TRIPLE%-alpine*}-${KSYSROOT_TRIPLE#*alpine-}"
+          link_triple="${KSYSROOT_TRIPLE}"
           echo "${lpackage}" >"${tgt_dir}/${package}".alias
-          versioned="no"
         fi
-        license="BSD-2-Clause"
-        test_pkgconfig=libcrypto
-        test_pkgconfig_expect=-lcrypto
         ;;
-      linux)
-        if [ "${KSYSROOT_OSFLAVOUR}" = "debian" ] && [ "${KSYSROOT_OSRELEASE}" = "12" ]
+      "Debian")
+        if [ "${KSYSROOT_OSRELEASE}" = "12" ]
         then
           lpackage="${package}"
           package="ksysroot_${KSYSROOT_TRIPLE}"
+          link_triple="${KSYSROOT_TRIPLE}"
           echo "${lpackage}" >"${tgt_dir}/${package}".alias
-          versioned="no"
         fi
-        license="GPL-2.0-or-later"
         test_pkgconfig=libcrypt
         test_pkgconfig_expect=-lcrypt
+        ;;
+      DragonFlyBSD)
+        if [ "${KSYSROOT_OSRELEASE}" = "6.4" ]
+        then
+          lpackage="${package}"
+          package="${package%6.4@*}"
+          link_triple="${KSYSROOT_TRIPLE%6.4}"
+          echo "${lpackage}" >"${tgt_dir}/${package}".alias
+        fi
+        test_pkgconfig=libcrypto
+        test_pkgconfig_expect=-lcrypto
+        ;;
+      FreeBSD)
+        if [ "${KSYSROOT_OSRELEASE}" = "14.2-RELEASE" ]
+        then
+          lpackage="${package}"
+          package="${package%14.2@*}"
+          link_triple="${KSYSROOT_TRIPLE%14.2}"
+          echo "${lpackage}" >"${tgt_dir}/${package}".alias
+        fi
+        test_pkgconfig=libcrypto
+        test_pkgconfig_expect=-lcrypto
+        ;;
+      NetBSD)
+        if [ "${KSYSROOT_OSRELEASE}" = "10.1" ]
+        then
+          lpackage="${package}"
+          package="${package%10.1@*}"
+          link_triple="${KSYSROOT_TRIPLE%10.1}"
+          echo "${lpackage}" >"${tgt_dir}/${package}".alias
+        fi
+        ;;
+      OpenBSD)
+        if [ "${KSYSROOT_OSRELEASE}" = "7.6" ]
+        then
+          lpackage="${package}"
+          package="${package%7.6@*}"
+          link_triple="${KSYSROOT_TRIPLE%7.6}"
+          echo "${lpackage}" >"${tgt_dir}/${package}".alias
+        fi
         ;;
       *) ;;
     esac
@@ -148,65 +199,52 @@ emit_package() {
     revision=
   fi
 
+  if [ "${KSYSROOT_TRIPLE}" != "native" ] && [ "${MESON_CPUFAMILY}" = "x86_64" ]
+  then
+    case "${KSYSROOT_OSFLAVOUR}" in
+      Alpine | Debian | NetBSD | DragonFlyBSD)
+        disable="  on_linux do
+    disable! date: \"2024-01-01\", because: \"Unwanted system libraries\"
+  end
+"
+        ;;
+      *) ;;
+    esac
+  fi
+
   cat >"${package_file}" <<EOF
 class ${formula} < Formula
   desc "Sysroot for ${KSYSROOT_TRIPLE}@${KSYSROOT_OSFLAVOUR}${KSYSROOT_OSRELEASE}"
   homepage "https://github.com/kevemueller/ksysroot"
   url "${KSYSROOT_URL}"
   sha256 "${KSYSROOT_SHA}"
-  license "${license}"
-${revision}  head "https://github.com/kevemueller/ksysroot.git", branch: "main"
+  license "${KSYSROOT_LICENSE}"
+${revision}  head "${KSYSROOT_GIT}", using: :git, branch: "main"
 
-EOF
-
-  if [ "${versioned}" = "yes" ]
-  then
-    cat >>"${package_file}" <<EOF
-  keg_only :versioned_formula
-
-EOF
-  fi
-
-  cat >>"${package_file}" <<EOF
-  depends_on "meson" => :test
-  depends_on "lld"
+${version}  depends_on "meson" => :test
+${depnative}  depends_on "lld"
   depends_on "llvm"
   depends_on "pkgconf"
 
-EOF
-
-  if [ "${KSYSROOT_TRIPLE}" != "native" ]
-  then
-    cat >>"${package_file}" <<EOF
-  uses_from_macos "libarchive"
-
-EOF
-  fi
-
-  cat >>"${package_file}" <<EOF
-  on_sonoma :or_older do
+${uses_from_macos}  on_sonoma :or_older do
     # for sha256sum
     depends_on "coreutils"
   end
-
+${disable}
 EOF
-
-  if [ "${MESON_SYSTEM}" = "linux" ] && [ "${MESON_CPUFAMILY}" = "x86_64" ]
-  then
-    cat >>"${package_file}" <<EOF
-  on_linux do
-    disable! date: "2024-01-01", because: "Unwanted system libraries"
-  end
-
-EOF
-  fi
 
   local pkg version url file file_sha256
   while read -r pkg version url file file_sha256
   do
     # 1>&2 echo PKG="${pkg}" URL="${url}" FILE="${file}"
     test "${pkg}" = "#" && continue
-    cat >>"${package_file}" <<EOF
+    if [ ${#file_sha256} -ne 64 ]
+    then
+      cache_file="$(cache "${url}" "${file}" "${file_sha256}")"
+      file_sha256="$(sha256sum "${cache_file}" | cut -d" " -f 1)"
+    fi
+
+    cat <<EOF
   resource "${pkg}" do
     url "${url}"
     version "${version}-ksr"
@@ -214,9 +252,10 @@ EOF
   end
 
 EOF
-  done <"${bomfile}"
+  done <"${bomfile}" >>"${package_file}"
 
-  cat >>"${package_file}" <<EOF
+  {
+    cat <<EOF
   def install
     cachedir=ENV.fetch("HOMEBREW_CACHE")
     ENV["CACHE_DIR"]=cachedir
@@ -225,32 +264,38 @@ EOF
     ENV["PKG_CONFIG"]="#{Formula["pkgconf"].bin}/pkg-config"
 EOF
 
-  if [ "${KSYSROOT_TRIPLE}" = "native" ]
-  then
-    cat >>"${package_file}" <<EOF
+    if [ "${KSYSROOT_TRIPLE}" = "native" ]
+    then
+      cat <<EOF
     system "./ksysroot.sh", "install", "native", prefix
+    mkdir "#{share}/meson/native"
+    share.install "#{prefix}/native.txt" => "meson/native/ksysroot"
   end
 EOF
-  else
-    cat >>"${package_file}" <<EOF
+    else
+      cat <<EOF
     bom = <<~EOS
 EOF
-    sed -nE 's/^(#.*)$/      \1/p' "${bomfile}" >>"${package_file}"
-    cat >>"${package_file}" <<EOF
+      sed -nE 's/^(#.*)$/      \1/p' "${bomfile}" >>"${package_file}"
+      cat <<EOF
     EOS
     bom << resources.map { |r|
       "#{r.name} #{r.version.to_s.delete_suffix("-ksr")} #{r.url} " \\
         "#{r.cached_download.relative_path_from(cachedir)} #{r.checksum}"
     }.join("\n")
     bom << "\n"
-    ohai "bom=#{bom}"
     File.write("bom.in", bom)
-    system "./ksysroot.sh", "frombom", prefix, "bom.in"
+    link_triple="${link_triple}"
+    system "./ksysroot.sh", "frombom", prefix, "bom.in", link_triple
+    rm prefix/"native.txt"
+    meson_cross = share/"meson/cross"
+    mkdir meson_cross
+    meson_cross.install prefix/"cross.txt" => "${KSYSROOT_FULL_TRIPLE}"
+    meson_cross.install_symlink meson_cross/"${KSYSROOT_FULL_TRIPLE}" => link_triple unless link_triple.empty?
   end
 EOF
-  fi
-
-  cat >>"${package_file}" <<EOF
+    fi
+    cat <<EOF
   test do
     resource "testcases" do
       url ${formula}.stable.url
@@ -273,106 +318,72 @@ EOF
       ENV.delete("CPATH")
       ENV.delete("PKG_CONFIG_LIBDIR")
       system "set"
-      # build a C library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             ${cross_file}testpath/"build-c", "test-c"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-c"
-      assert_predicate testpath/"build-c/main", :exist?
-
-      # build a C++ library + program with meson
-      system Formula["meson"].bin/"meson", "setup", "--native-file=#{prefix}/native.txt",
-             ${cross_file}testpath/"build-cxx", "test-cxx"
-      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build-cxx"
-      assert_predicate testpath/"build-cxx/main", :exist?
+      # build a C and C++ library + program with meson
+      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
+             ${cross_file}testpath/"build"
+      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
+      # test for the executables
+      assert_predicate testpath/"build/test-c/main", :exist?
+      assert_predicate testpath/"build/test-cxx/main", :exist?
 EOF
-  if [ "${KSYSROOT_TRIPLE}" = "native" ]
-  then
-    cat >>"${package_file}" <<EOF
+    if [ "${KSYSROOT_TRIPLE}" = "native" ]
+    then
+      cat <<EOF
       # check that pkg-config runs
-      system "#{bin}/${KSYSROOT_TRIPLE}-pkg-config", "--list-all"
+      system bin/"native-pkg-config", "--list-all"
 EOF
-  else
-    cat >>"${package_file}" <<EOF
+    elif [ -n "${test_pkgconfig}" ]
+    then
+      cat <<EOF
       # check pkg-config personality is properly set-up
-      assert_equal "${test_pkgconfig_expect}", shell_output("#{bin}/${KSYSROOT_TRIPLE}-pkg-config --libs ${test_pkgconfig}").strip
-      assert_equal "", shell_output("#{bin}/${KSYSROOT_TRIPLE}-pkg-config --cflags ${test_pkgconfig}").strip
+      assert_equal "${test_pkgconfig_expect}", shell_output("#{bin}/${KSYSROOT_FULL_TRIPLE}-pkg-config --libs ${test_pkgconfig}").strip
+      assert_equal "", shell_output("#{bin}/${KSYSROOT_FULL_TRIPLE}-pkg-config --cflags ${test_pkgconfig}").strip
 EOF
-  fi
-  cat >>"${package_file}" <<EOF
+    fi
+    cat <<EOF
     end
   end
 end
 EOF
+  } >>"${package_file}"
   echo "${package_file}"
 }
 
-mkdir -p "${CACHE_DIR}" "${BUILD_DIR}"
-fetch_ksysroot
-cp ~/git.own/ksysroot/ksysroot.sh ~/git.own/ksysroot/functions* "${KSYSROOT_DIR}"
+usage() {
+  echo "Usage: "
+  echo "  $0 {iterate|iterate1|iterate2|iterate3}"
+  echo "  $0 new"
+  echo "  $0 mod"
+}
 
-# shellcheck disable=SC1091
-. "${KSYSROOT_DIR}"/functions
+setup() {
+  mkdir -p "${CACHE_DIR}" "${BUILD_DIR}"
+  fetch_ksysroot
 
-rmdir -p "${BUILD_DIR}/new" "${BUILD_DIR}/mod" 2>/dev/null || true
+  # shellcheck disable=SC1091
+  . "${KSYSROOT_DIR}"/functions
 
-if [ -d "${BUILD_DIR}"/new ]
-then
-  echo "Processing new entries"
-  branch="prm_new"
-  git checkout -b "${branch}"
-  find "${BUILD_DIR}/new" -name "*.rb" | while IFS= read -r package; do
-    base=$(basename "${package}")
-    echo new "${base}"
-    if [ -e "${package%.rb}.alias" ]
-    then
-      ln -sf "../Formula/${base}" ../Aliases/"$(cat "${package%.rb}.alias")"
-      rm "${package%.rb}.alias"
-    fi
-    unbottle test "${package}" >../Formula/"${base}"
-    rm "${package}"
-  done
-  list_exceptions | jq --sort-keys >../audit_exceptions/mismatched_binary_allowlist.json
-  git add ../Aliases/* ../Formula/* ../audit_exceptions/*
-  git commit -m"new"
-  git push
-  gh pr create --title "new" --body "new"
-  git checkout main
-  git branch -d "${branch}"
-elif [ -d "${BUILD_DIR}"/mod ]
-then
-  echo "Processing modified entries"
-  find "${BUILD_DIR}/mod" -name "*.rb" | while IFS= read -r package; do
-    base=$(basename "${package}")
-    echo make "${base}"
-    if [ -e "${package%.rb}.alias" ]
-    then
-      branch="prp_${base%.rb}"
-    else
-      branch="prm_${base%.rb}"
-    fi
-    git checkout -b "${branch}"
-    mv "${package}" ../Formula
-    if [ -e "${package%.rb}.alias" ]
-    then
-      ln -sf "../Formula/${base}" ../Aliases/"$(cat "${package%.rb}.alias")"
-      rm "${package%.rb}.alias"
-    fi
-    git add ../Aliases/* ../Formula/*
-    git commit -m"update ${base%.rb}"
-    git push
-    gh pr create --title "update ${base%.rb}" --body "update ${base%.rb}"
-    git checkout main
-    git branch -d "${branch}"
-  done
-else
+  rmdir -p "${BUILD_DIR}/new" "${BUILD_DIR}/mod" 2>/dev/null || true
+}
+
+iterate() {
+  local cmd="$1"
+  local filter="${2:-.}"
   echo "Iterating"
 
   bom=$(${MKTEMP})
-  "${KSYSROOT_DIR}"/ksysroot.sh iterate | grep native | while IFS= read -r flavour; do
+  "${KSYSROOT_DIR}"/ksysroot.sh "${cmd}" | grep "${filter}" | while IFS= read -r flavour; do
     echo
     echo "==> working" on "${flavour}"
     REVISION=
-    "${KSYSROOT_DIR}"/ksysroot.sh bom "${flavour}" >"${bom}"
+
+    if find "${CACHE_DIR}/${flavour}.bom" -newermt "2 days ago"
+    then
+      echo Using caced BOM "${CACHE_DIR}/${flavour}.bom"
+      cp "${CACHE_DIR}/${flavour}.bom" "${bom}"
+    else
+      "${KSYSROOT_DIR}"/ksysroot.sh bom "${flavour}" | tee "${CACHE_DIR}/${flavour}.bom" >"${bom}"
+    fi
     new_package_file=$(emit_package "${bom}" build)
     old_package_file=../Formula/"$(basename "${new_package_file}")"
     if [ -e "${old_package_file}" ]
@@ -404,6 +415,83 @@ else
     # exit 1
   done
   rm "${bom}"
+}
+
+new() {
+  echo "Processing new entries"
+  branch="prm_new"
+  git checkout -b "${branch}"
+  find "${BUILD_DIR}/new" -name "*.rb" | while IFS= read -r package; do
+    base=$(basename "${package}")
+    echo new "${base}"
+    if [ -e "${package%.rb}.alias" ]
+    then
+      ln -sf "../Formula/${base}" ../Aliases/"$(cat "${package%.rb}.alias")"
+      rm "${package%.rb}.alias"
+    fi
+    unbottle test "${package}" >../Formula/"${base}"
+    rm "${package}"
+  done
+  list_exceptions | jq --sort-keys >../audit_exceptions/mismatched_binary_allowlist.json
+  git add ../Aliases/* ../Formula/* ../audit_exceptions/*
+  git commit -m"new"
+  git push
+  gh pr create --title "new" --body "new"
+  git checkout main
+  git branch -d "${branch}"
+}
+
+mod() {
+  echo "Processing modified entries"
+  find "${BUILD_DIR}/mod" -name "*.rb" | while IFS= read -r package; do
+    base=$(basename "${package}")
+    echo make "${base}"
+    if [ -e "${package%.rb}.alias" ] || [ "${base}" = "ksysroot_native.rb" ]
+    then
+      branch="prp_${base%.rb}"
+    else
+      branch="prm_${base%.rb}"
+    fi
+    git checkout -b "${branch}"
+    mv "${package}" ../Formula
+    if [ -e "${package%.rb}.alias" ]
+    then
+      ln -sf "../Formula/${base}" ../Aliases/"$(cat "${package%.rb}.alias")"
+      rm "${package%.rb}.alias"
+    fi
+    git add ../Aliases/* ../Formula/*
+    brew style "../Formula/${base}"
+    git commit -m"update ${base%.rb}"
+    git push
+    gh pr create --title "update ${base%.rb}" --body "update ${base%.rb}"
+    git checkout main
+    git branch -d "${branch}"
+  done
+}
+
+if [ $# -eq 0 ]
+then
+  usage
+  exit 1
 fi
+
+cmd="$1"
+shift
+
+setup
+
+case "${cmd}" in
+  iterate*)
+    rm -rf "${BUILD_DIR}/new" "${BUILD_DIR}/mod"
+    iterate "${cmd}" "$@"
+    ;;
+  new)
+    new "$@"
+    ;;
+  mod)
+    mod "$@"
+    ;;
+  *) ;;
+esac
 
 exit 0
