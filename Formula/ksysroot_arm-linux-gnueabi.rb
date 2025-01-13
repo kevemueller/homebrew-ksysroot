@@ -1,17 +1,10 @@
 class KsysrootArmLinuxGnueabi < Formula
   desc "Sysroot for arm-linux-gnueabi@Debian12"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
-  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
+  sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "GPL-2.0-or-later"
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "b872de25f50ec87c7081f54e8632efc05d5d1ff050a11116cc6d963a52e90a68"
-    sha256 cellar: :any_skip_relocation, ventura:       "95feab7acaecb3641e68a0d53840c35bec59cee49d8c115df78f64bb7e0781a1"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "fd5e0599f6c9a545d8a23488d3f3a245270bbf9147acd98a627dc5adf02e39e5"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
