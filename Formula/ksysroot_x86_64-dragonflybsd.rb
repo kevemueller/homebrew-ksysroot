@@ -6,6 +6,12 @@ class KsysrootX8664Dragonflybsd < Formula
   license "BSD-3-Clause"
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
+  bottle do
+    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "a67f1a1a5bcbbd1c7501cdfc86d1df48c0413fb2e9882c351dbf32054eb31ae5"
+    sha256                               ventura:       "da5acd101e2abcb06dd8dac2d7003c54d536d239b0bf525b3a79804aba45dfea"
+  end
+
   depends_on "meson" => :test
   depends_on "ksysroot_native"
   depends_on "lld"
