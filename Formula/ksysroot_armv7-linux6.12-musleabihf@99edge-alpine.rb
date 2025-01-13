@@ -1,8 +1,8 @@
 class KsysrootArmv7Linux612MusleabihfAT99edgeAlpine < Formula
   desc "Sysroot for armv7-alpine-linux-musleabihf@Alpine99edge"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
-  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
+  sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "MIT"
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
@@ -141,5 +141,36 @@ class KsysrootArmv7Linux612MusleabihfAT99edgeAlpine < Formula
     mkdir meson_cross
     meson_cross.install prefix/"cross.txt" => "armv7-linux6.12-musleabihf"
     meson_cross.install_symlink meson_cross/"armv7-linux6.12-musleabihf" => link_triple unless link_triple.empty?
+  end
+  test do
+    resource "testcases" do
+      url KsysrootArmv7Linux612MusleabihfAT99edgeAlpine.stable.url
+      sha256 KsysrootArmv7Linux612MusleabihfAT99edgeAlpine.stable.checksum.hexdigest
+    end
+    resource("testcases").stage do
+      ENV.delete("CC")
+      ENV.delete("CXX")
+      ENV.delete("CXX")
+      ENV.delete("OBJC")
+      ENV.delete("OBJCXX")
+      ENV.delete("CFLAGS")
+      ENV.delete("CPPFLAGS")
+      ENV.delete("CXXFLAGS")
+      ENV.delete("LDFLAGS")
+      ENV.delete("LD_RUN_PATH")
+      ENV.delete("LIBRARY_PATH")
+      ENV.delete("OBJCFLAGS")
+      ENV.delete("OBJCXXFLAGS")
+      ENV.delete("CPATH")
+      ENV.delete("PKG_CONFIG_LIBDIR")
+      system "set"
+      # build a C and C++ library + program with meson
+      system Formula["meson"].bin/"meson", "setup", "--native-file=ksysroot",
+             "--cross-file=armv7-linux6.12-musleabihf", testpath/"build"
+      system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
+      # test for the executables
+      assert_predicate testpath/"build/test-c/main", :exist?
+      assert_predicate testpath/"build/test-cxx/main", :exist?
+    end
   end
 end
