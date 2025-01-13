@@ -6,6 +6,13 @@ class KsysrootPowerpc64leLinuxMusl < Formula
   license "MIT"
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
+  bottle do
+    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "255836fde708b9d6f93b0913ac94392901d6f44213b94d9b4457f8ef032aa6fa"
+    sha256 cellar: :any_skip_relocation, ventura:       "d859d679de39d351157959a859d0b801e5f27d7ca45456d813321f09f1587e0d"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "b7adf23f4f9eb173bca7d6824a986ff74ffbc37fbd161899ea5a7f0331f915f9"
+  end
+
   depends_on "meson" => :test
   depends_on "ksysroot_native"
   depends_on "lld"
