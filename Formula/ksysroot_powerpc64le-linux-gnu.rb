@@ -1,17 +1,10 @@
 class KsysrootPowerpc64leLinuxGnu < Formula
   desc "Sysroot for powerpc64le-linux-gnu@Debian12"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
-  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
+  sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "GPL-2.0-or-later"
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "7c5b24bf8baff32e36458df70ef4255010d563788668c66be056f4529cada1a9"
-    sha256 cellar: :any_skip_relocation, ventura:       "4cca9b369d747b2ea410d5db63fe7e5412da4bc5e7cf13d5a14b49c36dc8c888"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "c9b03203a6f86938bb32eeaec0498ed099d8e704dbe27c2dad27d45b1364a3ba"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
