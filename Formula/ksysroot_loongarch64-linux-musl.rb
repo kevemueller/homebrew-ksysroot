@@ -1,18 +1,10 @@
 class KsysrootLoongarch64LinuxMusl < Formula
   desc "Sysroot for loongarch64-alpine-linux-musl@Alpinev3.21"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
-  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
+  sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "MIT"
-  revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "73944d3993929c7aefc90b99f9aef9d7342aabf3394f3924ff3ad29afe6cbdf4"
-    sha256 cellar: :any_skip_relocation, ventura:       "a24f761218259ca024a484e34c28d8c811db5e9d8ac825b54b2f86de6808e158"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "be1a06d4b16fca301ed302cc7d1db7848403fd7cebe8ca8ef136c28e6efdfaf5"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
