@@ -1,18 +1,10 @@
 class KsysrootArmv7LinuxMusleabihf < Formula
   desc "Sysroot for armv7-alpine-linux-musleabihf@Alpinev3.21"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
-  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
+  sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "MIT"
-  revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "9314ca24f97c1dac195a1ad441435f256bc5a05e87eb8089c537679a5f322586"
-    sha256 cellar: :any_skip_relocation, ventura:       "453aeeaab13b7a41e395439c2de9ae18df7422d4057eee7f96b193c3b0990f62"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "28fa61bb5ed16ec904141fd0cb37f583497a98504b4c251b36a220823483b467"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
