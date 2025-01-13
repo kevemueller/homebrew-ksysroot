@@ -6,6 +6,13 @@ class KsysrootPowerpc64leLinuxGnu < Formula
   license "GPL-2.0-or-later"
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
+  bottle do
+    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "f7877aae862cf9003e5f59abb1ae2a8ce24a8fef8728abc4e9312c8fe07f8703"
+    sha256 cellar: :any_skip_relocation, ventura:       "56c2e3f406ce06999119fdbd60ae09ee3e23a75799e0920f9d5fab7b205b1839"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "75040c6b6fefc84cca53bb38a2390c1adfebbd3e119ed4e7a5b22a4b29769b2b"
+  end
+
   depends_on "meson" => :test
   depends_on "ksysroot_native"
   depends_on "lld"
