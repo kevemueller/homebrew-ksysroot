@@ -1,17 +1,10 @@
 class KsysrootAarch64Freebsd < Formula
   desc "Sysroot for aarch64-freebsd14.2@FreeBSD14.2-RELEASE"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
-  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
+  sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "BSD-2-Clause"
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "b358a5779c48735cd201c67e79347f49853a8dd6e0dafcdfc61c60733fd5f05a"
-    sha256 cellar: :any_skip_relocation, ventura:       "c46e5c512e07b3f105e97f72d88776880cf8e9ad74515b60ba52a7fac9b4f210"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "8bd39b7aea6a8d2c86e27a9525654a16e601450a6248e5d387debe052e7d8120"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
