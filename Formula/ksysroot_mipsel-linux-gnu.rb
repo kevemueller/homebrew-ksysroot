@@ -1,17 +1,10 @@
 class KsysrootMipselLinuxGnu < Formula
   desc "Sysroot for mipsel-linux-gnu@Debian12"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
-  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
+  sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "GPL-2.0-or-later"
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "b260c65a5464ac463a13553ee006eec1a6d063ff26066f222e6341fdb93ba915"
-    sha256 cellar: :any_skip_relocation, ventura:       "767ec67e7127beb2936153fa23d73ef25d230f69a96accebf4ce69d33f9fa0b7"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "e14c0ff78ccfc8ecab0a128e94b186231e8f8045324d891f7480211527c72c44"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
