@@ -1,10 +1,9 @@
 class KsysrootX8664Linux612MuslAT99edgeAlpine < Formula
   desc "Sysroot for x86_64-alpine-linux-musl@Alpine99edge"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
-  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
+  sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "MIT"
-  revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
   depends_on "meson" => :test
