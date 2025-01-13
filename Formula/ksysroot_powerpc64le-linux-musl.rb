@@ -1,18 +1,10 @@
 class KsysrootPowerpc64leLinuxMusl < Formula
   desc "Sysroot for powerpc64le-alpine-linux-musl@Alpinev3.21"
   homepage "https://github.com/kevemueller/ksysroot"
-  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.tar.gz"
-  sha256 "7be9578afc0ec7d47874ee8bc6d3457f1b703241a1ff47dbd3906f88b5200f6a"
+  url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
+  sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "MIT"
-  revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "86e1a9273d395bb653da58c9646be3c8c6d9cff00019e590cc8ec4a3ccd2efb4"
-    sha256 cellar: :any_skip_relocation, ventura:       "e8aae33e94214b380ce79fa86f1c1be280f143ba23ee83975452f731ca1bdcb2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "9aebac2fd4b932cdc9ecd5bf77afc5025cc7209d418c340ecd30eadf9be2c5cf"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
