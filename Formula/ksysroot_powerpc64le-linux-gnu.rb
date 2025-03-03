@@ -4,14 +4,8 @@ class KsysrootPowerpc64leLinuxGnu < Formula
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
   sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "GPL-2.0-or-later"
+  revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "f7877aae862cf9003e5f59abb1ae2a8ce24a8fef8728abc4e9312c8fe07f8703"
-    sha256 cellar: :any_skip_relocation, ventura:       "56c2e3f406ce06999119fdbd60ae09ee3e23a75799e0920f9d5fab7b205b1839"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "75040c6b6fefc84cca53bb38a2390c1adfebbd3e119ed4e7a5b22a4b29769b2b"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
@@ -273,8 +267,8 @@ class KsysrootPowerpc64leLinuxGnu < Formula
              "--cross-file=powerpc64le-linux6.1-gnu", testpath/"build"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
       # test for the executables
-      assert_predicate testpath/"build/test-c/main", :exist?
-      assert_predicate testpath/"build/test-cxx/main", :exist?
+      assert_path_exists testpath/"build/test-c/main"
+      assert_path_exists testpath/"build/test-cxx/main"
       # check pkg-config personality is properly set-up
       assert_equal "-lcrypt", shell_output("#{bin}/powerpc64le-linux6.1-gnu-pkg-config --libs libcrypt").strip
       assert_equal "", shell_output("#{bin}/powerpc64le-linux6.1-gnu-pkg-config --cflags libcrypt").strip
