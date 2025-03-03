@@ -1,5 +1,5 @@
 class Kyua < Formula
-  desc "Testing framework for infrastructure software"
+  desc "Testing framework for infrastructure software (staged)"
   homepage "https://github.com/freebsd/kyua"
   #  url "https://github.com/freebsd/kyua/releases/download/kyua-0.14/kyua-0.14.tar.gz"
   url "https://github.com/freebsd/kyua.git", tag: "kyua-0.14"
