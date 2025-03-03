@@ -4,13 +4,8 @@ class KsysrootX8664Dragonflybsd < Formula
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
   sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "BSD-3-Clause"
+  revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "a67f1a1a5bcbbd1c7501cdfc86d1df48c0413fb2e9882c351dbf32054eb31ae5"
-    sha256                               ventura:       "da5acd101e2abcb06dd8dac2d7003c54d536d239b0bf525b3a79804aba45dfea"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
@@ -88,8 +83,8 @@ class KsysrootX8664Dragonflybsd < Formula
              "--cross-file=x86_64-dragonflybsd6.4", testpath/"build"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
       # test for the executables
-      assert_predicate testpath/"build/test-c/main", :exist?
-      assert_predicate testpath/"build/test-cxx/main", :exist?
+      assert_path_exists testpath/"build/test-c/main"
+      assert_path_exists testpath/"build/test-cxx/main"
       # check pkg-config personality is properly set-up
       assert_equal "-lcrypto", shell_output("#{bin}/x86_64-dragonflybsd6.4-pkg-config --libs libcrypto").strip
       assert_equal "", shell_output("#{bin}/x86_64-dragonflybsd6.4-pkg-config --cflags libcrypto").strip
