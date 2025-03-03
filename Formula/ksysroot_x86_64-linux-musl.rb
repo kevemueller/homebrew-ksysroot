@@ -4,13 +4,8 @@ class KsysrootX8664LinuxMusl < Formula
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
   sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "MIT"
+  revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "bd523da4126a74a3cdfd15951267ad7e960ca1e91b8a8a352c1a6ad03dd2fca2"
-    sha256 cellar: :any_skip_relocation, ventura:       "ac08610371ce02ddc2fb162582e9835a68beaf448b6ee43ccbc741ba2b8df03f"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
@@ -178,8 +173,8 @@ class KsysrootX8664LinuxMusl < Formula
              "--cross-file=x86_64-linux6.12-musl", testpath/"build"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
       # test for the executables
-      assert_predicate testpath/"build/test-c/main", :exist?
-      assert_predicate testpath/"build/test-cxx/main", :exist?
+      assert_path_exists testpath/"build/test-c/main"
+      assert_path_exists testpath/"build/test-cxx/main"
     end
   end
 end
