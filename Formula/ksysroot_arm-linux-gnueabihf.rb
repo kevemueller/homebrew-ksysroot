@@ -4,14 +4,8 @@ class KsysrootArmLinuxGnueabihf < Formula
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
   sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "GPL-2.0-or-later"
+  revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "f59ff727429546a09e9fd546d05e419b07071e8e775574f5f0fabdea41516846"
-    sha256 cellar: :any_skip_relocation, ventura:       "1356d8126610ec35023aab69e590ab4f0c498e095008d86a6ef968b7af8047c3"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f561884bd75509b3f7385546974cd62b213a9ea5ab420544629e2f8ccc90d98e"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
@@ -249,8 +243,8 @@ class KsysrootArmLinuxGnueabihf < Formula
              "--cross-file=arm-linux6.1-gnueabihf", testpath/"build"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
       # test for the executables
-      assert_predicate testpath/"build/test-c/main", :exist?
-      assert_predicate testpath/"build/test-cxx/main", :exist?
+      assert_path_exists testpath/"build/test-c/main"
+      assert_path_exists testpath/"build/test-cxx/main"
       # check pkg-config personality is properly set-up
       assert_equal "-lcrypt", shell_output("#{bin}/arm-linux6.1-gnueabihf-pkg-config --libs libcrypt").strip
       assert_equal "", shell_output("#{bin}/arm-linux6.1-gnueabihf-pkg-config --cflags libcrypt").strip
