@@ -4,14 +4,8 @@ class KsysrootRiscv64LinuxMusl < Formula
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
   sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "MIT"
+  revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "73d001a46de48654eb49ede50302024958a87681bdae95f28c729de202c84915"
-    sha256 cellar: :any_skip_relocation, ventura:       "7ea562e630b6ee99cd292b1b7349e5c55af449c5d167ba5649486e84b6295954"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d51579752562eef84fb3f69b085f626a55b3ec7c18f278f6b96f2b19023e4e46"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
@@ -176,8 +170,8 @@ class KsysrootRiscv64LinuxMusl < Formula
              "--cross-file=riscv64-linux6.12-musl", testpath/"build"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
       # test for the executables
-      assert_predicate testpath/"build/test-c/main", :exist?
-      assert_predicate testpath/"build/test-cxx/main", :exist?
+      assert_path_exists testpath/"build/test-c/main"
+      assert_path_exists testpath/"build/test-cxx/main"
     end
   end
 end
