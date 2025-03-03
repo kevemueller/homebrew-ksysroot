@@ -4,6 +4,7 @@ class KsysrootAarch64Linux612GnuAT13Debian < Formula
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
   sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "GPL-2.0-or-later"
+  revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
 
   depends_on "meson" => :test
@@ -194,8 +195,8 @@ class KsysrootAarch64Linux612GnuAT13Debian < Formula
              "--cross-file=aarch64-linux6.12-gnu", testpath/"build"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
       # test for the executables
-      assert_predicate testpath/"build/test-c/main", :exist?
-      assert_predicate testpath/"build/test-cxx/main", :exist?
+      assert_path_exists testpath/"build/test-c/main"
+      assert_path_exists testpath/"build/test-cxx/main"
       # check pkg-config personality is properly set-up
       assert_equal "-lcrypt", shell_output("#{bin}/aarch64-linux6.12-gnu-pkg-config --libs libcrypt").strip
       assert_equal "", shell_output("#{bin}/aarch64-linux6.12-gnu-pkg-config --cflags libcrypt").strip
