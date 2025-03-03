@@ -4,13 +4,8 @@ class KsysrootX8664Netbsd < Formula
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
   sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "BSD-4-Clause-UC"
+  revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "9dde9e19061faad53f55c02a53ed163b955476def866d45b620aa0da36d3ea19"
-    sha256 cellar: :any_skip_relocation, ventura:       "f1f28dc0d0337f3293514da6ed0f001096c060ac0f7eacbbd61cf9a01306e804"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
@@ -94,8 +89,8 @@ class KsysrootX8664Netbsd < Formula
              "--cross-file=x86_64-netbsd10.1", testpath/"build"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
       # test for the executables
-      assert_predicate testpath/"build/test-c/main", :exist?
-      assert_predicate testpath/"build/test-cxx/main", :exist?
+      assert_path_exists testpath/"build/test-c/main"
+      assert_path_exists testpath/"build/test-cxx/main"
     end
   end
 end
