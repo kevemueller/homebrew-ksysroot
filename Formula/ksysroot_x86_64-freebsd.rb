@@ -4,14 +4,8 @@ class KsysrootX8664Freebsd < Formula
   url "https://github.com/kevemueller/ksysroot/archive/refs/tags/v0.8.1.tar.gz"
   sha256 "1091e2e6314c063e00234cb7694b5d03900c292f5025ebcc362770079a612d2e"
   license "BSD-2-Clause"
+  revision 1
   head "https://github.com/kevemueller/ksysroot.git", using: :git, branch: "main"
-
-  bottle do
-    root_url "https://ghcr.io/v2/kevemueller/ksysroot"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "61d7635da6373915b89786b5547b486bba1c152220ea7a06fbfcd0ec3bd11f92"
-    sha256 cellar: :any_skip_relocation, ventura:       "27bb20766dbf8987fd5002b7a229f00dd5e9a50528617562720d86b61193179a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "3d5509d8ef086779882f8881e45ad00decd0db04bb28d2e99956e516638e0594"
-  end
 
   depends_on "meson" => :test
   depends_on "ksysroot_native"
@@ -86,8 +80,8 @@ class KsysrootX8664Freebsd < Formula
              "--cross-file=x86_64-freebsd14.2", testpath/"build"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
       # test for the executables
-      assert_predicate testpath/"build/test-c/main", :exist?
-      assert_predicate testpath/"build/test-cxx/main", :exist?
+      assert_path_exists testpath/"build/test-c/main"
+      assert_path_exists testpath/"build/test-cxx/main"
       # check pkg-config personality is properly set-up
       assert_equal "-lcrypto", shell_output("#{bin}/x86_64-freebsd14.2-pkg-config --libs libcrypto").strip
       assert_equal "", shell_output("#{bin}/x86_64-freebsd14.2-pkg-config --cflags libcrypto").strip
