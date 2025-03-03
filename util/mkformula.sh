@@ -323,8 +323,8 @@ EOF
              ${cross_file}testpath/"build"
       system Formula["meson"].bin/"meson", "compile", "-C", testpath/"build"
       # test for the executables
-      assert_predicate testpath/"build/test-c/main", :exist?
-      assert_predicate testpath/"build/test-cxx/main", :exist?
+      assert_path_exists testpath/"build/test-c/main"
+      assert_path_exists testpath/"build/test-cxx/main"
 EOF
     if [ "${KSYSROOT_TRIPLE}" = "native" ]
     then

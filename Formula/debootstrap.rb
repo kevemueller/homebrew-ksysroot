@@ -112,7 +112,7 @@ class Debootstrap < Formula
   test do
     system sbin/name, "--version"
     assert_match "libc6", shell_output("#{sbin}/#{name} --print-debs --arch=amd64 bookworm my-tmp-dir").strip
-    refute_predicate testpath/"my-tmp-dir", :exist?
+    refute_path_exists testpath/"my-tmp-dir"
   end
 end
 __END__
