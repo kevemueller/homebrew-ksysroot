@@ -1,10 +1,10 @@
 class Kyua < Formula
   desc "Testing framework for infrastructure software (staged)"
   homepage "https://github.com/freebsd/kyua"
-  #  url "https://github.com/freebsd/kyua/releases/download/kyua-0.14/kyua-0.14.tar.gz"
-  url "https://github.com/freebsd/kyua.git", tag: "kyua-0.14"
+  url "https://github.com/freebsd/kyua/releases/download/kyua-0.14/kyua-0.14.tar.gz"
+  sha256 "3373469b3fb8e0eea4cbfbaf8e3a10d48085fd70dc2718efc4c9f912b5e7102e"
+  # url "https://github.com/freebsd/kyua.git", tag: "kyua-0.14"
   license "BSD-3-Clause"
-  head "https://github.com/freebsd/kyua.git", branch: "master"
 
   bottle do
     root_url "https://ghcr.io/v2/kevemueller/ksysroot"
@@ -14,9 +14,12 @@ class Kyua < Formula
     sha256 x86_64_linux:  "32e213f817bf7431ee88ca51d26bea866e24a92e72f253180f72981990520013"
   end
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "libtool" => :build
+  head do
+    url "https://github.com/freebsd/kyua.git", branch: "master"
+    depends_on "autoconf" => :build
+    depends_on "automake" => :build
+    depends_on "libtool" => :build
+  end
   depends_on "pkgconf" => :build
   depends_on "atf"
   depends_on "lua"
@@ -24,7 +27,7 @@ class Kyua < Formula
   depends_on "sqlite"
 
   def install
-    system "autoreconf", "-i", "-s"
+    system "autoreconf", "-i", "-s" if build.head?
     system "./configure", "--enable-atf", "--disable-developer", "--disable-dependency-tracking",
                           "--disable-silent-rules",
                           "--prefix=#{prefix}"
@@ -34,6 +37,6 @@ class Kyua < Formula
   end
 
   test do
-    assert_match "0.14", shell_output("#{bin}/kyua about")
+    assert_match "Kyua", shell_output("#{bin}/kyua about")
   end
 end
